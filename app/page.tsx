@@ -1,103 +1,242 @@
+import Link from "next/link";
 import Image from "next/image";
+import { FadeIn, HoverLift, Stagger, Item, ParallaxBanner } from "@/components/Animated";
 
 export default function Home() {
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <>
+      {/* === HERO (Parallax) === */}
+      <section className="section pt-6">
+        <div className="container">
+          <ParallaxBanner
+            image="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=2000&auto=format&fit=crop"
+            height="min-h-[65vh]"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+            <div className="flex items-center justify-center h-full text-center">
+              <div className="max-w-2xl px-6">
+                <FadeIn>
+                  <h1 className="text-3xl md:text-5xl font-extrabold text-white drop-shadow">
+                    كل ما تحتاجه لحفلٍ مثالي — في منصة واحدة
+                  </h1>
+                </FadeIn>
+                <FadeIn delay={0.1}>
+                  <p className="mt-3 text-white/90 text-lg">
+                    اكتشف القاعات، أضف الضيافة والديكور والتصوير والقهوة والشاي. تسعير واضح وتجربة سهلة.
+                  </p>
+                </FadeIn>
+                <FadeIn delay={0.2}>
+                  <div className="mt-6 flex items-center justify-center gap-3">
+                    <Link className="btn btn-gold" href="/halls">
+                      <i className="fa-solid fa-magnifying-glass" /> ابحث عن قاعة
+                    </Link>
+                    <Link className="btn btn-ghost" href="/corporate">
+                      <i className="fa-solid fa-building" /> حلول الشركات
+                    </Link>
+                  </div>
+                </FadeIn>
+              </div>
+            </div>
+          </ParallaxBanner>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+      </section>
+
+      {/* === QUICK SEARCH === */}
+      <section className="section">
+        <div className="container">
+          <FadeIn>
+            <form action="/halls" className="card p-4 grid gap-3 md:grid-cols-2">
+              <label className="field">
+                <span className="label">المدينة</span>
+                <select className="select" required>
+                  <option>الرياض</option>
+                  <option>جدة</option>
+                  <option>الدمام</option>
+                  <option>مكة</option>
+                </select>
+              </label>
+
+              <label className="field">
+                <span className="label">التاريخ</span>
+                <input type="date" className="input" required />
+              </label>
+
+              <label className="field">
+                <span className="label">الفترة</span>
+                <select className="select" required>
+                  <option>مسائية</option>
+                  <option>صباحية</option>
+                  <option>يوم كامل</option>
+                </select>
+              </label>
+
+              <div className="grid grid-cols-2 gap-3">
+                <label className="field">
+                  <span className="label">رجال</span>
+                  <input type="number" className="input" min={0} placeholder="0" />
+                </label>
+                <label className="field">
+                  <span className="label">نساء</span>
+                  <input type="number" className="input" min={0} placeholder="0" />
+                </label>
+              </div>
+
+              <button className="btn btn-primary md:col-span-2">
+                <i className="fa-solid fa-magnifying-glass" /> بحث سريع
+              </button>
+            </form>
+          </FadeIn>
+        </div>
+      </section>
+
+      {/* === SERVICE STRIP (icons + hover) === */}
+      <section className="section section-muted">
+        <div className="container">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-bold text-lg">خدمات تكمل حفلِك</h2>
+            <Link className="text-[#2563EB]" href="/catering">
+              عرض جميع الخدمات
+            </Link>
+          </div>
+
+          <Stagger>
+            <div className="grid-4">
+              {[
+                { href: "/catering", icon: "fa-utensils", title: "الضيافة / الكيترنغ", desc: "قوائم لكل فرد (رجال/نساء)." },
+                { href: "/decor", icon: "fa-wand-magic-sparkles", title: "الديكور", desc: "حزم المسرح والطاولات والزهور." },
+                { href: "/photography", icon: "fa-camera", title: "التصوير", desc: "رجال / نساء — فوتو + فيديو." },
+                { href: "/catering", icon: "fa-mug-hot", title: "قهوة وشاي", desc: "طاقم ضيافة محترف." },
+              ].map((s, i) => (
+                <Item key={i}>
+                  <HoverLift>
+                    <Link href={s.href} className="card p-5 block group">
+                      <div className="text-2xl">
+                        <i className={`fa-solid ${s.icon}`} />
+                      </div>
+                      <h3 className="font-bold mt-2">{s.title}</h3>
+                      <p className="text-gray-600 mt-1">{s.desc}</p>
+                      <div className="mt-3 text-sm text-[#2563EB] opacity-0 group-hover:opacity-100 transition-opacity">
+                        استكشاف <i className="fa-solid fa-arrow-left-long" />
+                      </div>
+                    </Link>
+                  </HoverLift>
+                </Item>
+              ))}
+            </div>
+          </Stagger>
+        </div>
+      </section>
+
+      {/* === FEATURED HALLS (cards with hover + lazy images) === */}
+      <section className="section">
+        <div className="container">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-bold text-lg">قاعات مميزة</h2>
+            <Link className="text-[#2563EB]" href="/halls">
+              عرض الكل
+            </Link>
+          </div>
+
+          <Stagger>
+            <div className="grid-3">
+              {[
+                {
+                  slug: "al-yakout",
+                  city: "الرياض",
+                  name: "قاعة الياقوت",
+                  price: 12000,
+                  img: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=1600&auto=format&fit=crop",
+                },
+                {
+                  slug: "al-fayrouz",
+                  city: "جدة",
+                  name: "قاعة الفيروز",
+                  price: 9500,
+                  img: "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=1600&auto=format&fit=crop",
+                },
+                {
+                  slug: "al-massa",
+                  city: "مكة",
+                  name: "قاعة الماسة",
+                  price: 14000,
+                  img: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=1600&auto=format&fit=crop",
+                },
+              ].map((h, i) => (
+                <Item key={i}>
+                  <HoverLift>
+                    <Link href={`/halls/${h.slug}`} className="card block">
+                      <div className="relative h-44">
+                        <Image
+                          src={h.img}
+                          alt={h.name}
+                          fill
+                          sizes="(max-width: 768px) 100vw, 33vw"
+                          className="object-cover"
+                          priority={i === 0}
+                        />
+                      </div>
+                      <div className="p-4">
+                        <h3 className="font-bold">{h.name}</h3>
+                        <p className="text-gray-500 text-sm mt-1">{h.city} • سعة 500+</p>
+                        <div className="mt-2">
+                          ابتداءً من <b>{h.price.toLocaleString("ar-SA")}</b> ر.س
+                        </div>
+                        <div className="mt-3 btn btn-ghost w-max">
+                          <i className="fa-regular fa-eye" /> عرض التفاصيل
+                        </div>
+                      </div>
+                    </Link>
+                  </HoverLift>
+                </Item>
+              ))}
+            </div>
+          </Stagger>
+        </div>
+      </section>
+
+      {/* === TRUST / BADGES STRIP === */}
+      <section className="section section-muted">
+        <div className="container">
+          <Stagger>
+            <div className="grid-4">
+              {[
+                { icon: "fa-shield-halved", title: "موثوقة", text: "تحقق إداري + مراجعات بعد المناسبة." },
+                { icon: "fa-receipt", title: "تسعير واضح", text: "تفصيل القاعة + الضيافة + الإضافات." },
+                { icon: "fa-bolt", title: "سريعة", text: "بحث، تصفية، وحجز بخطوات قليلة." },
+                { icon: "fa-mobile-screen", title: "متوافقة مع الجوال", text: "تجربة ممتازة على الشاشات الصغيرة." },
+              ].map((b, i) => (
+                <Item key={i}>
+                  <div className="card p-5">
+                    <div className="text-2xl">
+                      <i className={`fa-solid ${b.icon}`} />
+                    </div>
+                    <h3 className="font-bold mt-2">{b.title}</h3>
+                    <p className="text-gray-600 mt-1">{b.text}</p>
+                  </div>
+                </Item>
+              ))}
+            </div>
+          </Stagger>
+        </div>
+      </section>
+
+      {/* === CTA BANNER === */}
+      <section className="section">
+        <div className="container">
+          <FadeIn>
+            <div className="card p-6 md:p-8 bg-gradient-to-br from-ivory to-white">
+              <div className="flex flex-col md:flex-row gap-4 md:items-center md:justify-between">
+                <div>
+                  <h3 className="text-xl font-extrabold">لديك قاعة أو خدمة وتريد عملاء أكثر؟</h3>
+                  <p className="text-gray-600 mt-1">انضم إلى منصة مناسبات وابدأ باستقبال الطلبات اليوم.</p>
+                </div>
+                <Link href="/vendors" className="btn btn-primary">
+                  <i className="fa-solid fa-store" /> انضم كمزود
+                </Link>
+              </div>
+            </div>
+          </FadeIn>
+        </div>
+      </section>
+    </>
   );
 }
