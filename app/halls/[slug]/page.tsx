@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { halls } from "@/lib/data";
 import { services } from "@/lib/services";
+import AddonsPicker, { type ServiceLite } from "@/components/AddonsPicker";
 
 type Props = { params: { slug: string } };
 
@@ -26,6 +27,11 @@ export default function HallDetails({ params }: Props) {
 
   const amenitiesText = hall.amenities?.length ? hall.amenities.join(" • ") : "—";
   const totalCapacity = hall.menCapacity + hall.womenCapacity;
+
+  // Prepare serializable services for the client picker
+  const cityServices: ServiceLite[] = services
+    .filter((s) => s.city === hall.city)
+    .map((s) => ({ id: s.id, title: s.title, vendor: s.vendor, priceFrom: s.priceFrom, kind: s.kind }));
 
   return (
     <section className="section section-muted">
@@ -125,7 +131,7 @@ export default function HallDetails({ params }: Props) {
           </aside>
         </div>
 
-        {/* Description & add-ons */}
+        {/* Description & Add-ons (client picker) */}
         <div className="mt-6 grid md:grid-cols-[1fr_360px] gap-4">
           <div className="card p-4">
             <h3 className="font-bold mb-2">الوصف</h3>
@@ -134,42 +140,7 @@ export default function HallDetails({ params }: Props) {
             </p>
           </div>
 
-          <div className="card p-4">
-            <h3 className="font-bold mb-3">أضف خدمات مكملة</h3>
-            <div className="grid grid-cols-1 gap-2">
-              {services
-                .filter((s) => s.city === hall.city)
-                .map((s) => (
-                  <label key={s.id} className="p-3 rounded-lg border flex items-center justify-between gap-3 cursor-pointer">
-                    <div className="flex items-center gap-3">
-                      <input type="checkbox" name="addons" value={s.id} />
-                      <div>
-                        <div className="font-bold">{s.title}</div>
-                        <div className="text-gray-500 text-sm">{s.vendor} • ابتداءً من {s.priceFrom.toLocaleString("ar-SA")} ر.س</div>
-                      </div>
-                    </div>
-                    <Link href={`/${s.kind}`} className="text-[#2563EB] text-sm hover:underline">تفاصيل</Link>
-                  </label>
-                ))}
-            </div>
-            <form
-              action={`/book/${hall.id}`}
-              method="GET"
-              onSubmit={(e) => {
-                const form = e.currentTarget as HTMLFormElement;
-                const checked = Array.from(form.querySelectorAll<HTMLInputElement>('input[name="addons"]:checked')).map((i) => i.value);
-                const url = new URL(form.action, window.location.origin);
-                if (checked.length) url.searchParams.set("addons", checked.join(","));
-                e.preventDefault();
-                window.location.href = url.toString();
-              }}
-            >
-              <button className="btn btn-primary w-full mt-3">متابعة الحجز</button>
-              <Link href={`/book/${hall.id}`} className="btn btn-ghost w-full mt-2">
-                متابعة بدون إضافات
-              </Link>
-            </form>
-          </div>
+          <AddonsPicker hallId={hall.id} services={cityServices} />
         </div>
       </div>
     </section>
