@@ -1,4 +1,3 @@
-// app/halls/map/page.tsx
 "use client";
 
 import { useEffect, useRef } from "react";
@@ -6,7 +5,13 @@ import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import Link from "next/link";
 import { halls } from "@/lib/data";
+import type { Hall } from "@/lib/data";
 import { formatPrice } from "@/lib/utils";
+
+type HallWithCoords = Hall & { lat: number; lng: number };
+function hasCoords(h: Hall): h is HallWithCoords {
+  return typeof (h as any).lat === "number" && typeof (h as any).lng === "number";
+}
 
 export default function HallsMapPage() {
   const mapRef = useRef<HTMLDivElement>(null);
@@ -15,7 +20,7 @@ export default function HallsMapPage() {
   useEffect(() => {
     if (!mapRef.current) return;
 
-    // Basic style: OSM raster tiles (no key)
+    // Free OSM raster style (no API key)
     const map = new maplibregl.Map({
       container: mapRef.current,
       style: {
@@ -25,27 +30,18 @@ export default function HallsMapPage() {
             type: "raster",
             tiles: ["https://a.tile.openstreetmap.org/{z}/{x}/{y}.png"],
             tileSize: 256,
-            attribution: '© OpenStreetMap contributors',
+            attribution: "© OpenStreetMap contributors",
           },
         },
         layers: [{ id: "osm", type: "raster", source: "osm" }],
       },
       center: [46.6753, 24.7136], // Riyadh
       zoom: 9,
-      hash: false,
     });
-
-    // If you get a MapTiler key, use a nicer vector style:
-    // const map = new maplibregl.Map({
-    //   container: mapRef.current,
-    //   style: `https://api.maptiler.com/maps/streets-v2/style.json?key=${process.env.NEXT_PUBLIC_MAPTILER_KEY}`,
-    //   center: [46.6753, 24.7136],
-    //   zoom: 9
-    // });
 
     map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), "top-right");
 
-    halls.filter(h => h.lng && h.lat).forEach(h => {
+    halls.filter(hasCoords).forEach((h) => {
       const el = document.createElement("div");
       el.className = "marker-card";
       el.innerHTML = `<div class="marker-inner">${formatPrice(h.basePrice)} ر.س</div>`;
@@ -59,7 +55,10 @@ export default function HallsMapPage() {
               <a href="/halls/${h.id}" class="link">عرض التفاصيل</a>
             </div>
           </div>`;
-        new maplibregl.Popup({ closeOnClick: true }).setLngLat([h.lng, h.lat]).setHTML(html).addTo(map);
+        new maplibregl.Popup({ closeOnClick: true })
+          .setLngLat([h.lng, h.lat])
+          .setHTML(html)
+          .addTo(map);
       };
 
       new maplibregl.Marker({ element: el, anchor: "bottom" })
@@ -84,19 +83,24 @@ export default function HallsMapPage() {
         <div className="grid lg:grid-cols-[1fr_380px] gap-3">
           <div ref={mapRef} className="h-[70vh] rounded-xl overflow-hidden border" />
           <div className="card p-3 h-[70vh] overflow-auto">
-            {halls.map(h => (
+            {halls.map((h) => (
               <div key={h.id} className="p-3 border-b last:border-0">
                 <div className="font-bold">{h.name}</div>
-                <div className="text-gray-600 text-sm">{h.city} • {h.area}</div>
-                <div className="text-sm mt-1">ابتداءً من <b>{formatPrice(h.basePrice)}</b> ر.س</div>
-                <Link href={`/halls/${h.id}`} className="btn btn-ghost mt-2">عرض التفاصيل</Link>
+                <div className="text-gray-600 text-sm">
+                  {h.city} • {h.area}
+                </div>
+                <div className="text-sm mt-1">
+                  ابتداءً من <b>{formatPrice(h.basePrice)}</b> ر.س
+                </div>
+                <Link href={`/halls/${h.id}`} className="btn btn-ghost mt-2">
+                  عرض التفاصيل
+                </Link>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      {/* Marker styles */}
       <style jsx global>{`
         .marker-card { transform: translateY(-6px); }
         .marker-inner {
