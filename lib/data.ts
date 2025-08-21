@@ -36,6 +36,7 @@ export const halls: Hall[] = [
     sessions: ["صباحية", "مسائية", "يوم كامل"],
     rating: 4.6,
     reviewsCount: 42,
+    lat: 24.774265, Ing: 46.738586,
   },
   {
     id: "fayrouz",
@@ -53,6 +54,7 @@ export const halls: Hall[] = [
     sessions: ["مسائية", "يوم كامل"],
     rating: 4.4,
     reviewsCount: 18,
+    lat: 24.774265, Ing: 46.738586,
   },
   {
     id: "massa",
@@ -69,6 +71,7 @@ export const halls: Hall[] = [
     sessions: ["صباحية", "مسائية"],
     rating: 4.7,
     reviewsCount: 27,
+    lat: 24.774265, Ing: 46.738586,
   },
 ];
 

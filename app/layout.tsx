@@ -6,6 +6,7 @@ import Link from "next/link";
 import ClientTransition from "@/components/ClientTransition";
 import { CartProvider } from "@/components/CartProvider";
 import MiniCartButton from "@/components/CartDrawer";
+import { AuthProvider } from "@/components/AuthProvider";
 
 const tajawal = Tajawal({
   subsets: ["arabic"],
@@ -68,10 +69,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </div>
           </header>
 
-          {/* Page transitions */}
-          <ClientTransition>
-            <main>{children}</main>
-          </ClientTransition>
+          {/* Page transitions with AuthProvider */}
+          <AuthProvider>
+            <ClientTransition>
+              <main>{children}</main>
+            </ClientTransition>
+          </AuthProvider>
 
           {/* FOOTER */}
           <footer className="bg-[#0f1220] text-[#eaeaea] mt-8">

@@ -1,22 +1,33 @@
+// app/catering/page.tsx
+import Link from "next/link";
+import { Stagger, Item, HoverLift } from "@/components/Animated";
+
 export default function CateringPage() {
+  const items = [
+    { id: "cat-gold", title: "باقة ذهبية", price: 95, desc: "قائمة رجال/نساء — 95 ر.س/فرد" },
+    { id: "cat-silver", title: "باقة فضية", price: 75, desc: "قائمة رجال/نساء — 75 ر.س/فرد" },
+    { id: "cat-premium", title: "باقة مميزة", price: 130, desc: "أطباق مميزة وخدمة كاملة" },
+  ];
   return (
     <section className="section">
       <div className="container">
-        <h2 className="font-bold text-lg mb-1">مزودو الضيافة / الكيترنغ</h2>
-        <p className="text-gray-600 mb-4">قوائم لكل فرد (رجال/نساء)، باقات متنوعة.</p>
-        <div className="grid-3">
-          {["المذاق الفاخر","الضيافة الملكية","مطابخ النخبة"].map((t,i)=>(
-            <article key={i} className="card">
-              <div className="h-40 bg-center bg-cover" style={{backgroundImage:"url(https://images.unsplash.com/photo-1504754524776-8f4f37790ca0?q=80&w=1600&auto=format&fit=crop)"}} />
-              <div className="p-4">
-                <h3 className="font-bold">{t}</h3>
-                <p className="text-gray-500 text-sm mt-1">قوائم من 75 ر.س/فرد</p>
-                <div className="mt-2">باقة أساسية: <b>6,500</b> ر.س</div>
-                <a href="#" className="btn btn-ghost mt-3">عرض الباقة</a>
-              </div>
-            </article>
-          ))}
-        </div>
+        <h1 className="text-2xl font-bold mb-3">الضيافة / الكيترنغ</h1>
+        <Stagger>
+          <div className="grid-3">
+            {items.map((x) => (
+              <Item key={x.id}>
+                <HoverLift>
+                  <div className="card p-5">
+                    <h3 className="font-bold">{x.title}</h3>
+                    <div className="text-gray-600 text-sm mt-1">{x.desc}</div>
+                    <div className="mt-2">ابتداءً من <b>{x.price}</b> ر.س/فرد</div>
+                    <button className="btn btn-ghost mt-3">إضافة للسلة</button>
+                  </div>
+                </HoverLift>
+              </Item>
+            ))}
+          </div>
+        </Stagger>
       </div>
     </section>
   );
