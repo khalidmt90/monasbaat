@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@/components/AuthProvider";
-import DashboardShell from "@/components/dashboard/DashboardShell";
+import DashboardShell from "../../components/dashboard/DashboardShell"; // ← relative path
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 
