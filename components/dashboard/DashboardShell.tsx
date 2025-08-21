@@ -1,3 +1,4 @@
+// components/dashboard/DashboardShell.tsx
 "use client";
 
 import Link from "next/link";
@@ -37,7 +38,6 @@ export default function DashboardShell({ user, children }: Props) {
           <div className="text-gray-500 text-sm">
             {isVendor ? "مزود" : isAdmin ? "مسؤول" : "مستخدم"}
           </div>
-
           <nav className="mt-4 flex flex-col">
             {nav.map((item) => {
               const active = pathname === item.href;
@@ -56,7 +56,6 @@ export default function DashboardShell({ user, children }: Props) {
             })}
           </nav>
         </aside>
-
         <div>{children}</div>
       </div>
     </div>
