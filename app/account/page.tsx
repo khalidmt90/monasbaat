@@ -3,19 +3,36 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/components/AuthProvider";
 import Link from "next/link";
+import { useSession, signOut } from "next-auth/react";
 
 export default function AccountPage() {
-  const { user, logout } = useAuth();
   const router = useRouter();
+  const { data: session, status } = useSession();
 
-  // Redirect to login if not authenticated
+  // While we check the session, show nothing
+  if (status === "loading") {
+    return (
+      <section className="section">
+        <div className="container">
+          <div className="card p-5">جارِ التحميل...</div>
+        </div>
+      </section>
+    );
+  }
+
+  // If no session, go to login
   useEffect(() => {
-    if (!user) router.replace("/auth/login");
-  }, [user, router]);
+    if (status === "unauthenticated") {
+      router.replace("/auth/login?next=/account");
+    }
+  }, [status, router]);
 
-  if (!user) return null;
+  if (!session?.user) return null;
+
+  const role = (session.user as any).role || "USER";
+  const isAdmin = role === "ADMIN";
+  const isVendor = role === "VENDOR";
 
   return (
     <section className="section">
@@ -24,19 +41,39 @@ export default function AccountPage() {
           <h1 className="text-2xl font-bold mb-2">حسابي</h1>
 
           <div className="text-gray-700">
-            <div><b>الاسم:</b> {user.name}</div>
-            <div><b>الجوال:</b> {user.phone}</div>
-            <div><b>الدور:</b> {user.role}</div>
+            <div>
+              <b>البريد:</b> {session.user.email}
+            </div>
+            <div>
+              <b>الاسم:</b> {session.user.name || "—"}
+            </div>
+            <div>
+              <b>الدور:</b> {role}
+            </div>
           </div>
 
           <div className="flex gap-2 mt-4">
-            {user.role === "vendor" && (
-              <Link href="/dashboard/vendors" className="btn btn-ghost">لوحة المزود</Link>
+            {isVendor && (
+              <Link href="/dashboard/vendors" className="btn btn-ghost">
+                لوحة المزود
+              </Link>
             )}
-            {user.role === "admin" && (
-              <Link href="/dashboard/admin" className="btn btn-ghost">لوحة الإدارة</Link>
+
+            {isAdmin && (
+              <button
+                className="btn btn-ghost"
+                onClick={() => router.push("/dashboard/admin")}
+              >
+                لوحة الإدارة
+              </button>
             )}
-            <button className="btn btn-primary" onClick={logout}>تسجيل الخروج</button>
+
+            <button
+              className="btn btn-primary"
+              onClick={() => signOut({ callbackUrl: "/" })}
+            >
+              تسجيل الخروج
+            </button>
           </div>
         </div>
       </div>

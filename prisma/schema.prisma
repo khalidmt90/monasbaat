@@ -1,0 +1,105 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  role      String   @default("USER") // USER | ADMIN | VENDOR
+  phone     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  vendor   Vendor?
+  bookings Booking[]
+}
+
+model Vendor {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  company   String?
+  status    String   @default("pending")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User      @relation(fields: [userId], references: [id])
+  halls  Hall[]
+  offers Service[]
+}
+
+model Hall {
+  id            String   @id @default(cuid())
+  slug          String   @unique
+  name          String
+  city          String
+  area          String?
+  menCapacity   Int      @default(0)
+  womenCapacity Int      @default(0)
+  basePrice     Int
+  sessions      Json // ["morning","evening","full"]
+  amenities     Json // ["parking","sound","lighting"]
+  images        Json // ["https://...","https://..."]
+  lat           Float?
+  lng           Float?
+  rating        Float?
+  reviewsCount  Int?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  vendorId String?
+  vendor   Vendor?   @relation(fields: [vendorId], references: [id])
+  bookings Booking[]
+}
+
+model Service {
+  id        String   @id @default(cuid())
+  vendorId  String?
+  type      String // catering|decor|photography|coffee
+  title     String
+  summary   String?
+  price     Int
+  images    Json // array of urls
+  tags      Json // array of strings
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  vendor Vendor? @relation(fields: [vendorId], references: [id])
+}
+
+model Booking {
+  id          String   @id @default(cuid())
+  userId      String
+  hallId      String
+  date        DateTime
+  days        Int      @default(1)
+  session     String? // morning|evening|full
+  addons      Json // [{serviceId:"...", qty:1}]
+  status      String   @default("pending")
+  transferRef String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+  hall Hall @relation(fields: [hallId], references: [id])
+}
+
+model Banner {
+  id        String   @id @default(cuid())
+  section   String
+  title     String
+  subtitle  String?
+  imageUrl  String
+  ctaText   String?
+  ctaHref   String?
+  active    Boolean  @default(true)
+  sort      Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

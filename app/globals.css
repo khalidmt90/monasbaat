@@ -2,58 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
-:root { --radius: 16px; }
-html { direction: rtl; scroll-behavior: smooth; }
-body { background: #fff; }
-
-/* Utilities & components that use @apply must be in a layer */
-@layer utilities {
-  .container { @apply max-w-[1200px] mx-auto px-4; }
-
-  .text-ink{ color:#111827; }
-  .bg-ivory{ background:#F8F5EF; }
-  .bg-gold{ background:#C9A227; }
-  .text-gold{ color:#C9A227; }
-
-  .btn{ @apply inline-flex items-center justify-center gap-2 px-4 py-2 font-bold rounded-xl transition-transform duration-150 active:scale-[.98]; }
-  .btn-primary{ @apply bg-[#111827] text-white hover:brightness-110; }
-  .btn-ghost{ @apply bg-gray-100 text-[#111827] hover:bg-gray-200; }
-  .btn-gold{ @apply bg-gold text-black rounded-full px-4 py-2 font-bold hover:brightness-110; }
-
-  .nav-link{ @apply px-3 py-2 rounded-lg hover:bg-gray-100; }
-  .mob-link{ @apply px-3 py-2 rounded-lg hover:bg-gray-100; }
-
-  .card{ @apply border border-gray-200 rounded-2xl bg-white shadow-[0_8px_24px_rgba(17,24,39,.08)] overflow-hidden; }
-  .section{ @apply py-10; }
-  .section-muted{ @apply bg-ivory; }
-
-  .grid-3{ @apply grid gap-4 sm:grid-cols-2 lg:grid-cols-3; }
-  .grid-4{ @apply grid gap-4 sm:grid-cols-2 lg:grid-cols-4; }
-
-  .field{ @apply flex flex-col gap-1; }
-  .input,.select,.textarea{ @apply border border-gray-200 rounded-xl px-3 py-2 bg-white; }
-  .label{ @apply font-semibold text-sm; }
-
-  .foot-title{ @apply font-bold mb-2; }
-  .foot-link{ @apply hover:underline; }
-}
-
-/* Nice focus styles for accessibility */
-@layer base {
-  *:focus-visible { @apply outline-none ring-2 ring-gold/60; }
-}
-/* Marquee loop (vendor chips) */
-.marquee {
-  animation: marquee 22s linear infinite;
-}
-@keyframes marquee {
-  0% { transform: translateX(0) }
-  100% { transform: translateX(50%) } /* list is duplicated in code */
-}
-
-/* Micro motion polish */
-.card, .btn {
-  transition: transform .25s ease, box-shadow .25s ease;
-}
-.card:hover { transform: translateY(-2px) }
-.btn:hover { transform: translateY(-1px) }
+html, body { margin: 0; padding: 0; }
+body { @apply bg-white text-gray-900 antialiased; }
+.section { @apply py-10; }
+.container { @apply mx-auto px-4; }
+.card { @apply rounded-2xl shadow p-6 bg-white; }
+.btn { @apply inline-flex items-center justify-center rounded-xl px-4 py-2 font-medium; }
+.btn-primary { @apply bg-black text-white; }
+.input { @apply w-full rounded-xl border border-gray-300 px-3 py-2; }
+.label { @apply block mb-1 text-sm text-gray-700; }
+.field { @apply grid gap-1; }
