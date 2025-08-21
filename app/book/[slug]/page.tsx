@@ -2,14 +2,12 @@
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { notFound } from "next/navigation";
+import { useRouter, notFound } from "next/navigation";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { halls } from "@/lib/data";
 import { formatPrice } from "@/lib/utils";
 import { useCart } from "@/components/CartProvider";
 
-// --- Simple stepper UI
 function Stepper({ step }: { step: number }) {
   const labels = ["التاريخ والتفاصيل", "الخدمات الإضافية", "مراجعة وتأكيد"];
   return (
@@ -36,29 +34,32 @@ export default function BookHall({ params }: { params: { slug: string } }) {
   const router = useRouter();
   const { addItem } = useCart();
 
-  // Find hall by id (= slug). Guard early so TS knows `hall` exists below.
-  const hall = halls.find((h) => h.id === params.slug);
-  if (!hall) return notFound();
+  // Resolve hall and guard immediately
+  const hallObj = halls.find((h) => h.id === params.slug);
+  if (!hallObj) return notFound();
 
-  // --- Wizard state
+  // Deconstruct primitives so TS never sees a possibly-undefined object in closures
+  const hallId = hallObj.id;
+  const hallName = hallObj.name;
+  const hallCity = hallObj.city;
+  const hallArea = hallObj.area;
+  const menCap = hallObj.menCapacity;
+  const womenCap = hallObj.womenCapacity;
+  const basePrice = hallObj.basePrice;
+  const sessions = hallObj.sessions;
+
+  // Wizard state
   const [step, setStep] = useState<number>(1);
-
-  // Step 1: dates & details (range via start + days)
   const [startDate, setStartDate] = useState<string>("");
   const [days, setDays] = useState<number>(1);
-  const [session, setSession] = useState<string>(hall.sessions[0] || "مسائية");
-  const [men, setMen] = useState<number>(Math.min(100, hall.menCapacity));
-  const [women, setWomen] = useState<number>(Math.min(100, hall.womenCapacity));
-
-  // Step 2: quick add-on “tags” (users should add real vendor packages from category pages)
+  const [session, setSession] = useState<string>(sessions[0] || "مسائية");
+  const [men, setMen] = useState<number>(Math.min(100, menCap));
+  const [women, setWomen] = useState<number>(Math.min(100, womenCap));
   const [addons, setAddons] = useState<string[]>([]);
-
-  // Step 3: contact
   const [fullName, setFullName] = useState<string>("");
   const [phone, setPhone] = useState<string>("");
   const [email, setEmail] = useState<string>("");
 
-  // Derived end date
   const endDate = useMemo(() => {
     if (!startDate || !days) return "";
     const d = new Date(startDate);
@@ -66,46 +67,36 @@ export default function BookHall({ params }: { params: { slug: string } }) {
     return d.toISOString().slice(0, 10);
   }, [startDate, days]);
 
-  const holdHours = 48; // Admin-configurable later
+  const holdHours = 48;
 
   function toggleAddon(id: string) {
     setAddons((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
   }
-
   function validateStep1() {
     return !!startDate && days >= 1 && men >= 0 && women >= 0 && !!session;
   }
-
   function nextStep() {
-    if (step === 1 && !validateStep1()) {
-      alert("أكمل بيانات التاريخ والفترة والأعداد.");
-      return;
-    }
+    if (step === 1 && !validateStep1()) return alert("أكمل بيانات التاريخ والفترة والأعداد.");
     setStep((s) => Math.min(3, s + 1));
   }
-
   function backStep() {
     setStep((s) => Math.max(1, s - 1));
   }
-
   function skipAddons() {
     setStep(3);
   }
 
-  // Add hall to cart and go to /cart
+  // Submit → add hall to cart using primitives (no hallObj usage inside)
   function handleSubmit() {
-    if (!fullName || !phone) {
-      alert("الاسم الكامل ورقم الجوال مطلوبة.");
-      return;
-    }
+    if (!fullName || !phone) return alert("الاسم الكامل ورقم الجوال مطلوبة.");
 
     addItem({
-      id: `hall-${hall.id}-${Date.now()}`,
+      id: `hall-${hallId}-${Date.now()}`,
       type: "hall",
-      hallId: hall.id,
-      title: `حجز ${hall.name}`,
+      hallId,
+      title: `حجز ${hallName}`,
       meta: `${startDate} → ${endDate || startDate} • ${days} يوم • ${session}`,
-      price: hall.basePrice, // base rent; vendor services are separate items
+      price: basePrice,
       qty: 1,
       startDate,
       days,
@@ -114,39 +105,46 @@ export default function BookHall({ params }: { params: { slug: string } }) {
       women,
     });
 
-    router.push("/cart"); // review everything (hall + vendor packages) in one place
+    router.push("/cart");
   }
 
-  // Lightweight estimate for sidebar totals (illustrative only)
+  // Estimates (UI only)
   const cateringEstimate = (men + women) * 95;
   const platformPct = 5;
   const vatPct = 15;
-  const platformFee = Math.round((hall.basePrice + cateringEstimate) * (platformPct / 100));
-  const subtotal = hall.basePrice + cateringEstimate + platformFee;
+  const platformFee = Math.round((basePrice + cateringEstimate) * (platformPct / 100));
+  const subtotal = basePrice + cateringEstimate + platformFee;
   const vat = Math.round(subtotal * (vatPct / 100));
   const total = subtotal + vat;
 
-  // Prevent body scroll jitter on mobile when showing pickers (optional polish)
   useEffect(() => {
     document.documentElement.style.scrollBehavior = "smooth";
-    return () => { document.documentElement.style.scrollBehavior = ""; };
+    return () => {
+      document.documentElement.style.scrollBehavior = "";
+    };
   }, []);
 
   return (
     <section className="section">
       <div className="container">
-        <Breadcrumbs items={[{ label: "الرئيسية", href: "/" }, { label: "القاعات", href: "/halls" }, { label: hall.name }, { label: "الحجز" }]} />
-        <h1 className="text-2xl font-bold mb-2">حجز — {hall.name}</h1>
+        <Breadcrumbs
+          items={[
+            { label: "الرئيسية", href: "/" },
+            { label: "القاعات", href: "/halls" },
+            { label: hallName },
+            { label: "الحجز" },
+          ]}
+        />
+        <h1 className="text-2xl font-bold mb-2">حجز — {hallName}</h1>
         <p className="text-gray-600 mb-4">
-          {hall.city} • {hall.area} • السعة (رجال/نساء): {hall.menCapacity}/{hall.womenCapacity}
+          {hallCity} • {hallArea} • السعة (رجال/نساء): {menCap}/{womenCap}
         </p>
 
         <Stepper step={step} />
 
         <div className="grid gap-4 lg:grid-cols-[1fr_360px]">
-          {/* LEFT: Step content */}
+          {/* LEFT */}
           <div className="flex flex-col gap-4">
-            {/* Step 1 */}
             {step === 1 && (
               <div className="card p-4">
                 <h3 className="font-bold mb-3">١) التاريخ والفترة والتفاصيل</h3>
@@ -154,12 +152,7 @@ export default function BookHall({ params }: { params: { slug: string } }) {
                 <div className="grid md:grid-cols-2 gap-3">
                   <label className="field">
                     <span className="label">تاريخ البدء</span>
-                    <input
-                      type="date"
-                      className="input"
-                      value={startDate}
-                      onChange={(e) => setStartDate(e.target.value)}
-                    />
+                    <input type="date" className="input" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
                   </label>
                   <label className="field">
                     <span className="label">عدد الأيام</span>
@@ -177,7 +170,7 @@ export default function BookHall({ params }: { params: { slug: string } }) {
                   <label className="field">
                     <span className="label">فترة المناسبة</span>
                     <select className="select" value={session} onChange={(e) => setSession(e.target.value)}>
-                      {hall.sessions.map((s) => (
+                      {sessions.map((s) => (
                         <option key={s} value={s}>
                           {s}
                         </option>
@@ -220,13 +213,11 @@ export default function BookHall({ params }: { params: { slug: string } }) {
               </div>
             )}
 
-            {/* Step 2 */}
             {step === 2 && (
               <div className="card p-4">
                 <h3 className="font-bold mb-3">٢) اختر خدمات إضافية (اختياري)</h3>
                 <p className="text-gray-600">يمكنك أيضاً استعراض مزودين فعليين وإضافة باقاتهم إلى السلة.</p>
 
-                {/* Quick suggestions (still optional) */}
                 <div className="grid-4 mt-3">
                   {[
                     { id: "decor-basic", title: "الديكور — باقة أساسية" },
@@ -243,7 +234,6 @@ export default function BookHall({ params }: { params: { slug: string } }) {
                   ))}
                 </div>
 
-                {/* Deep links to real vendor sources */}
                 <div className="flex flex-wrap gap-2 mt-3">
                   <a href="/decor" className="btn btn-ghost"><i className="fa-solid fa-wand-magic-sparkles" /> الديكور</a>
                   <a href="/photography" className="btn btn-ghost"><i className="fa-solid fa-camera" /> التصوير</a>
@@ -257,13 +247,12 @@ export default function BookHall({ params }: { params: { slug: string } }) {
               </div>
             )}
 
-            {/* Step 3 */}
             {step === 3 && (
               <div className="card p-4">
                 <h3 className="font-bold mb-3">٣) مراجعة وتأكيد الحجز</h3>
                 <div className="grid md:grid-cols-2 gap-3 text-sm">
                   <div className="card p-3">
-                    <b>القاعة:</b> <span className="text-gray-700">{hall.name}</span><br />
+                    <b>القاعة:</b> <span className="text-gray-700">{hallName}</span><br />
                     <b>الفترة:</b> <span className="text-gray-700">{session}</span><br />
                     <b>التواريخ:</b> <span className="text-gray-700">{startDate || "—"} → {endDate || startDate || "—"} ({days} يوم)</span><br />
                     <b>الأعداد:</b> <span className="text-gray-700">رجال {men} • نساء {women}</span><br />
@@ -271,7 +260,7 @@ export default function BookHall({ params }: { params: { slug: string } }) {
                   </div>
                   <div className="card p-3">
                     <b>ملخص تقديري:</b>
-                    <div className="mt-1">إيجار القاعة: <b>{formatPrice(hall.basePrice)} ر.س</b></div>
+                    <div className="mt-1">إيجار القاعة: <b>{formatPrice(basePrice)} ر.س</b></div>
                     <div>الضيافة (تقديري): <b>{formatPrice(cateringEstimate)} ر.س</b></div>
                     <div>رسوم المنصة (5%): <b>{formatPrice(platformFee)} ر.س</b></div>
                     <div>الضريبة (15%): <b>{formatPrice(vat)} ر.س</b></div>
@@ -301,7 +290,6 @@ export default function BookHall({ params }: { params: { slug: string } }) {
               </div>
             )}
 
-            {/* Nav buttons */}
             <div className="flex items-center gap-2">
               {step > 1 && <button className="btn btn-ghost" onClick={backStep}>رجوع</button>}
               {step < 3 && (
@@ -318,10 +306,10 @@ export default function BookHall({ params }: { params: { slug: string } }) {
             </div>
           </div>
 
-          {/* RIGHT: live summary */}
+          {/* RIGHT summary */}
           <aside className="card p-4 h-max sticky top-24 space-y-2 text-sm">
             <h3 className="font-bold">الملخص السريع</h3>
-            <div className="flex justify-between"><span>إيجار القاعة</span><b>{formatPrice(hall.basePrice)} ر.س</b></div>
+            <div className="flex justify-between"><span>إيجار القاعة</span><b>{formatPrice(basePrice)} ر.س</b></div>
             <div className="flex justify-between"><span>الضيافة (تقديري)</span><b>{formatPrice(cateringEstimate)} ر.س</b></div>
             <div className="flex justify-between"><span>رسوم المنصة</span><b>5%</b></div>
             <div className="flex justify-between"><span>الضريبة</span><b>15%</b></div>
