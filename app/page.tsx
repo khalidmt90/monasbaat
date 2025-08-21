@@ -1,46 +1,205 @@
+// app/page.tsx
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
+import { useRef, useEffect } from "react";
+import { motion, useScroll, useTransform, animate } from "framer-motion";
 import { FadeIn, HoverLift, Stagger, Item, ParallaxBanner } from "@/components/Animated";
 
-export default function Home() {
+/* -------------------------
+   Sticky hero (shrinks on scroll)
+-------------------------- */
+function StickyHero() {
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start start", "end start"], // when hero ends, animation done
+  });
+  const scale = useTransform(scrollYProgress, [0, 1], [1, 0.9]);
+  const opacity = useTransform(scrollYProgress, [0, 1], [1, 0.85]);
+  const y = useTransform(scrollYProgress, [0, 1], [0, -24]);
+
   return (
-    <>
-      {/* === HERO (Parallax) === */}
-      <section className="section pt-6">
-        <div className="container">
-          <ParallaxBanner
-            image="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=2000&auto=format&fit=crop"
-            height="min-h-[65vh]"
+    <section ref={ref} className="section pt-6">
+      <div className="container">
+        <motion.div style={{ scale, opacity, y }} className="rounded-2xl overflow-hidden shadow-[0_10px_40px_rgba(0,0,0,.22)]">
+          <div
+            className="h-[68vh] md:h-[82vh] bg-cover bg-center relative"
+            style={{
+              backgroundImage:
+                "url(https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=2000&auto=format&fit=crop)",
+            }}
           >
-            <div className="flex items-center justify-center h-full text-center">
-              <div className="max-w-2xl px-6">
-                <FadeIn>
-                  <h1 className="text-3xl md:text-5xl font-extrabold text-white drop-shadow">
-                    كل ما تحتاجه لحفلٍ مثالي — في منصة واحدة
-                  </h1>
-                </FadeIn>
-                <FadeIn delay={0.1}>
-                  <p className="mt-3 text-white/90 text-lg">
-                    اكتشف القاعات، أضف الضيافة والديكور والتصوير والقهوة والشاي. تسعير واضح وتجربة سهلة.
-                  </p>
-                </FadeIn>
-                <FadeIn delay={0.2}>
-                  <div className="mt-6 flex items-center justify-center gap-3">
-                    <Link className="btn btn-gold" href="/halls">
-                      <i className="fa-solid fa-magnifying-glass" /> ابحث عن قاعة
-                    </Link>
-                    <Link className="btn btn-ghost" href="/corporate">
-                      <i className="fa-solid fa-building" /> حلول الشركات
-                    </Link>
-                  </div>
-                </FadeIn>
+            <div className="absolute inset-0 bg-black/35" />
+            <div className="relative h-full grid place-items-center text-center text-white px-6">
+              <div className="max-w-2xl">
+                <motion.div
+                  initial={{ y: 16, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ duration: 0.6 }}
+                  className="inline-flex items-center gap-2 bg-white/10 backdrop-blur rounded-full px-3 py-1 text-sm"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-gold" />
+                  منصة سعودية — حجوزات القاعات والخدمات
+                </motion.div>
+
+                <motion.h1
+                  initial={{ y: 16, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ duration: 0.6, delay: 0.08 }}
+                  className="text-3xl md:text-5xl font-extrabold drop-shadow mt-4 leading-[1.15]"
+                >
+                  كل ما تحتاجه لحفلٍ مثالي — في منصة واحدة
+                </motion.h1>
+
+                <motion.p
+                  initial={{ y: 16, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ duration: 0.6, delay: 0.16 }}
+                  className="mt-3 text-white/90 text-lg"
+                >
+                  اكتشف القاعات، أضف الضيافة والديكور والتصوير والقهوة والشاي. تسعير واضح وتجربة سهلة.
+                </motion.p>
+
+                <motion.div
+                  initial={{ y: 16, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ duration: 0.6, delay: 0.24 }}
+                  className="mt-6 flex items-center justify-center gap-3"
+                >
+                  <Link className="btn btn-gold" href="/halls">
+                    <i className="fa-solid fa-magnifying-glass" /> ابحث عن قاعة
+                  </Link>
+                  <Link className="btn btn-ghost" href="/corporate">
+                    <i className="fa-solid fa-building" /> حلول الشركات
+                  </Link>
+                </motion.div>
+              </div>
+            </div>
+
+            {/* soft gradient to page */}
+            <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white to-transparent" />
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+/* -------------------------
+   Animated counters (metrics)
+-------------------------- */
+function Metric({ value, label, delay = 0 }: { value: number; label: string; delay?: number }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  useEffect(() => {
+    if (!ref.current) return;
+    const controls = animate(0, value, {
+      duration: 1.1,
+      delay,
+      onUpdate: (v) => {
+        if (ref.current) ref.current.textContent = Math.round(v).toLocaleString("ar-SA");
+      },
+    });
+    return () => controls.stop();
+  }, [value, delay]);
+  return (
+    <div className="card p-5 text-center">
+      <div className="text-3xl font-extrabold text-ink">
+        <span ref={ref} />+
+      </div>
+      <div className="text-gray-600 mt-1">{label}</div>
+    </div>
+  );
+}
+
+function MetricsStrip() {
+  return (
+    <section className="section section-muted">
+      <div className="container">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <Metric value={320} label="قاعات متاحة" />
+          <Metric value={140} label="مزودو خدمات" delay={0.05} />
+          <Metric value={5200} label="حجوزات ناجحة" delay={0.1} />
+          <Metric value={47} label="متوسط تقييم ×10" delay={0.15} />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* -------------------------
+   Dual Parallax Banners
+-------------------------- */
+function ParallaxCards() {
+  return (
+    <section className="section">
+      <div className="container">
+        <div className="grid md:grid-cols-2 gap-4">
+          <ParallaxBanner
+            image="https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=2000&auto=format&fit=crop"
+            height="h-60 md:h-80"
+          >
+            <div className="p-5 md:p-6 text-white drop-shadow">
+              <h3 className="font-bold text-xl">ابحث عن القاعة المثالية</h3>
+              <p className="text-white/90 mt-1">فلترة بالمدينة، الفترة، السعة (رجال/نساء)، مع تسعير فوري وحاسبة تكاليف.</p>
+              <Link href="/halls" className="btn btn-primary mt-3">تصفح القاعات</Link>
+            </div>
+          </ParallaxBanner>
+
+          <ParallaxBanner
+            image="https://images.unsplash.com/photo-1523359346063-d879354c0ea5?q=80&w=2000&auto=format&fit=crop"
+            height="h-60 md:h-80"
+          >
+            <div className="p-5 md:p-6 text-white drop-shadow">
+              <h3 className="font-bold text-xl">أكمل التفاصيل في سلة واحدة</h3>
+              <p className="text-white/90 mt-1">أضف ديكور، تصوير (رجال/نساء)، ضيافة، قهوة — ثم أكّد الطلب دفعة واحدة.</p>
+              <div className="flex flex-wrap gap-2 mt-3">
+                <Link href="/decor" className="btn btn-ghost">الديكور</Link>
+                <Link href="/photography" className="btn btn-ghost">التصوير</Link>
+                <Link href="/catering" className="btn btn-ghost">الضيافة</Link>
               </div>
             </div>
           </ParallaxBanner>
         </div>
-      </section>
+      </div>
+    </section>
+  );
+}
 
-      {/* === QUICK SEARCH === */}
+/* -------------------------
+   Vendor marquee (infinite)
+-------------------------- */
+function VendorMarquee() {
+  const items = ["🎥 التصوير", "🎀 الديكور", "🍽️ الضيافة", "☕ القهوة", "🎤 الصوتيات", "🚗 الفاليه"];
+  return (
+    <section className="py-10 bg-[#0f1220] text-white overflow-hidden">
+      <div className="container">
+        <div className="text-center mb-4">
+          <h3 className="text-xl font-bold">شركاؤنا من مزودي الخدمات</h3>
+          <p className="text-gray-300">أفضل مزودي التصوير، الضيافة، الديكور، القهوة…</p>
+        </div>
+        <div className="relative">
+          <div className="marquee flex whitespace-nowrap gap-6 text-2xl opacity-90">
+            {items.concat(items).map((l, i) => (
+              <span key={i} className="px-4 py-2 rounded-xl bg-white/10 border border-white/10">
+                {l}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export default function Home() {
+  return (
+    <>
+      {/* === STICKY HERO (shrink on scroll) === */}
+      <StickyHero />
+
+      {/* === QUICK SEARCH (kept as is, wrapped with subtle fade) === */}
       <section className="section">
         <div className="container">
           <FadeIn>
@@ -88,14 +247,15 @@ export default function Home() {
         </div>
       </section>
 
-      {/* === SERVICE STRIP (icons + hover) === */}
+      {/* === METRICS (animated counters) === */}
+      <MetricsStrip />
+
+      {/* === SERVICE STRIP (as you had, with subtle lift) === */}
       <section className="section section-muted">
         <div className="container">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-bold text-lg">خدمات تكمل حفلِك</h2>
-            <Link className="text-[#2563EB]" href="/catering">
-              عرض جميع الخدمات
-            </Link>
+            <Link className="text-[#2563EB]" href="/catering">عرض جميع الخدمات</Link>
           </div>
 
           <Stagger>
@@ -109,9 +269,7 @@ export default function Home() {
                 <Item key={i}>
                   <HoverLift>
                     <Link href={s.href} className="card p-5 block group">
-                      <div className="text-2xl">
-                        <i className={`fa-solid ${s.icon}`} />
-                      </div>
+                      <div className="text-2xl"><i className={`fa-solid ${s.icon}`} /></div>
                       <h3 className="font-bold mt-2">{s.title}</h3>
                       <p className="text-gray-600 mt-1">{s.desc}</p>
                       <div className="mt-3 text-sm text-[#2563EB] opacity-0 group-hover:opacity-100 transition-opacity">
@@ -126,14 +284,15 @@ export default function Home() {
         </div>
       </section>
 
-      {/* === FEATURED HALLS (cards with hover + lazy images) === */}
+      {/* === PARALLAX BANNERS (2 cards) === */}
+      <ParallaxCards />
+
+      {/* === FEATURED HALLS (as you had) === */}
       <section className="section">
         <div className="container">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-bold text-lg">قاعات مميزة</h2>
-            <Link className="text-[#2563EB]" href="/halls">
-              عرض الكل
-            </Link>
+            <Link className="text-[#2563EB]" href="/halls">عرض الكل</Link>
           </div>
 
           <Stagger>
@@ -193,7 +352,10 @@ export default function Home() {
         </div>
       </section>
 
-      {/* === TRUST / BADGES STRIP === */}
+      {/* === VENDOR MARQUEE (infinite loop) === */}
+      <VendorMarquee />
+
+      {/* === TRUST STRIP (as you had) === */}
       <section className="section section-muted">
         <div className="container">
           <Stagger>
@@ -206,9 +368,7 @@ export default function Home() {
               ].map((b, i) => (
                 <Item key={i}>
                   <div className="card p-5">
-                    <div className="text-2xl">
-                      <i className={`fa-solid ${b.icon}`} />
-                    </div>
+                    <div className="text-2xl"><i className={`fa-solid ${b.icon}`} /></div>
                     <h3 className="font-bold mt-2">{b.title}</h3>
                     <p className="text-gray-600 mt-1">{b.text}</p>
                   </div>
@@ -219,7 +379,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* === CTA BANNER === */}
+      {/* === CTA BANNER (as you had) === */}
       <section className="section">
         <div className="container">
           <FadeIn>
