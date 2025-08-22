@@ -5,7 +5,7 @@ import * as React from "react";
 import { useSession } from "next-auth/react";
 
 /** Supported roles; extend as needed. */
-export type Role = "admin" | "manager" | "user";
+export type Role = "admin" | "manager" | "user" | "vendor";
 
 /** Legacy registration input shape used by older pages */
 export type RegisterStartInput =
@@ -15,7 +15,7 @@ export type RegisterStartInput =
 /** Legacy registration response shape expected by older pages */
 export type RegisterStartResult = {
   otpSent: boolean;
-  mockCode: string; // <-- always a string to satisfy setState<string>
+  mockCode: string; // always string so setState<string> is happy
 };
 
 /** Legacy OTP verify response */
