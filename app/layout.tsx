@@ -6,6 +6,7 @@ import Providers from "./providers";
 import { AuthProvider } from "@/components/AuthProvider";
 import Header from "@/components/Header";
 import ClientTransition from "@/components/ClientTransition";
+import RouteProgress from "@/components/RouteProgress";
 
 const tajawal = Tajawal({
   subsets: ["arabic"],
@@ -23,6 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="bg-white text-gray-900 antialiased">
         <Providers>
           <AuthProvider>
+            <RouteProgress />
             <Header />
             <main className="pt-20">{/* offset for fixed header */}
               <ClientTransition>{children}</ClientTransition>
