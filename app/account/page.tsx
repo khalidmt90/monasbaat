@@ -10,7 +10,14 @@ export default function AccountPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
 
-  // While we check the session, show nothing
+  // Always run effect hooks at top-level
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.replace("/auth/login?next=/account");
+    }
+  }, [status, router]);
+
+  // While we check the session, show loading UI
   if (status === "loading") {
     return (
       <section className="section">
@@ -20,13 +27,6 @@ export default function AccountPage() {
       </section>
     );
   }
-
-  // If no session, go to login
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      router.replace("/auth/login?next=/account");
-    }
-  }, [status, router]);
 
   if (!session?.user) return null;
 
