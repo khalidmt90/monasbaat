@@ -24,14 +24,18 @@ function StickyHero() {
     <section ref={ref} className="section pt-6">
       <div className="container">
         <motion.div style={{ scale, opacity, y }} className="rounded-2xl overflow-hidden shadow-[0_10px_40px_rgba(0,0,0,.22)]">
-          <div
-            className="h-[68vh] md:h-[82vh] bg-cover bg-center relative"
-            style={{
-              backgroundImage:
-                "url(https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=2000&auto=format&fit=crop)",
-            }}
-          >
-            <div className="absolute inset-0 bg-black/35" />
+          <div className="h-[68vh] md:h-[82vh] relative">
+            <div className="absolute inset-0 -z-10">
+              <Image
+                src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=2000&auto=format&fit=crop"
+                alt="Hero background"
+                fill
+                sizes="100vw"
+                className="object-cover"
+                priority
+              />
+              <div className="absolute inset-0 bg-black/35" />
+            </div>
             <div className="relative h-full grid place-items-center text-center text-white px-6">
               <div className="max-w-2xl">
                 <motion.div

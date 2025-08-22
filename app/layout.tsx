@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { Tajawal } from "next/font/google";
 import Providers from "./providers";
 import { AuthProvider } from "@/components/AuthProvider";
+import Header from "@/components/Header";
 
 const tajawal = Tajawal({
   subsets: ["arabic"],
@@ -21,6 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="bg-white text-gray-900 antialiased">
         <Providers>
           <AuthProvider>
+            <Header />
             {children}
           </AuthProvider>
         </Providers>
