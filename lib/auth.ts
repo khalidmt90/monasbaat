@@ -1,22 +1,23 @@
 // lib/auth.ts
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { redirect } from "next/navigation";
+import type { NextAuthOptions } from "next-auth";
+import GoogleProvider from "next-auth/providers/google";
 
-/** Get the current session (server-side) */
-export async function getSession() {
-  return getServerSession(authOptions);
-}
-
-/** Require an authenticated admin; otherwise redirect to login with ?next=... */
-export async function requireAdmin(nextPath?: string) {
-  const session = await getSession();
-  if (!session) {
-    redirect(`/auth/login?next=${encodeURIComponent(nextPath || "/dashboard/admin")}`);
-  }
-  // Optional role check (we set role=admin in jwt/session callbacks)
-  if ((session as any).role !== "admin") {
-    redirect("/");
-  }
-  return session;
-}
+export const authOptions: NextAuthOptions = {
+  providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    }),
+  ],
+  session: {
+    strategy: "jwt",
+  },
+  callbacks: {
+    async session({ session, token }) {
+      if (token) {
+        session.user.id = token.sub!;
+      }
+      return session;
+    },
+  },
+};
