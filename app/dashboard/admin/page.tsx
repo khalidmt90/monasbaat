@@ -1,13 +1,13 @@
-// app/dashboard/admin/page.tsx
+// app/admin/page.tsx
 "use client";
 
-import { useSession } from "next-auth/react";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 export default function AdminDashboard() {
-  const { data: session, status } = useSession();
   const router = useRouter();
+  const { data: session, status } = useSession(); // status: "loading" | "authenticated" | "unauthenticated"
 
   useEffect(() => {
     if (status === "loading") return;
@@ -17,11 +17,12 @@ export default function AdminDashboard() {
       return;
     }
 
-    if ((session as any).role !== "admin" && (session.user as any)?.role !== "admin") {
+    const role = (session.user as any)?.role ?? "USER";
+    if (String(role).toLowerCase() !== "admin") {
       router.replace("/");
       return;
     }
-  }, [session, status, router]);
+  }, [status, session, router]);
 
   if (status === "loading") return <p className="p-6">Loading…</p>;
   if (!session) return <p className="p-6">Redirecting…</p>;
