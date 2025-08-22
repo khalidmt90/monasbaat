@@ -5,6 +5,7 @@ import { Tajawal } from "next/font/google";
 import Providers from "./providers";
 import { AuthProvider } from "@/components/AuthProvider";
 import Header from "@/components/Header";
+import ClientTransition from "@/components/ClientTransition";
 
 const tajawal = Tajawal({
   subsets: ["arabic"],
@@ -23,7 +24,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Providers>
           <AuthProvider>
             <Header />
-            {children}
+            <main className="pt-20">{/* offset for fixed header */}
+              <ClientTransition>{children}</ClientTransition>
+            </main>
           </AuthProvider>
         </Providers>
       </body>

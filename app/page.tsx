@@ -6,6 +6,9 @@ import Image from "next/image";
 import { useRef, useEffect } from "react";
 import { motion, useScroll, useTransform, animate } from "framer-motion";
 import { FadeIn, HoverLift, Stagger, Item, ParallaxBanner } from "@/components/Animated";
+import TypeReveal from "@/components/TypeReveal";
+import { ScrollReveal } from "@/components/ScrollReveal";
+import FallbackImage from "@/components/FallbackImage";
 
 /* -------------------------
    Sticky hero (shrinks on scroll)
@@ -48,14 +51,12 @@ function StickyHero() {
                   منصة سعودية — حجوزات القاعات والخدمات
                 </motion.div>
 
-                <motion.h1
-                  initial={{ y: 16, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ duration: 0.6, delay: 0.08 }}
-                  className="text-3xl md:text-5xl font-extrabold drop-shadow mt-4 leading-[1.15]"
-                >
-                  كل ما تحتاجه لحفلٍ مثالي — في منصة واحدة
-                </motion.h1>
+                <TypeReveal
+                  text="كل ما تحتاجه لحفلٍ مثالي — في منصة واحدة"
+                  className="text-3xl md:text-5xl font-extrabold drop-shadow mt-4 leading-[1.15] tracking-tight"
+                  speed={0.04}
+                  delay={0.1}
+                />
 
                 <motion.p
                   initial={{ y: 16, opacity: 0 }}
@@ -204,9 +205,9 @@ export default function Home() {
       <StickyHero />
 
       {/* === QUICK SEARCH (kept as is, wrapped with subtle fade) === */}
-      <section className="section">
+    <section className="section">
         <div className="container">
-          <FadeIn>
+      <ScrollReveal>
             <form action="/halls" className="card p-4 grid gap-3 md:grid-cols-2">
               <label className="field">
                 <span className="label">المدينة</span>
@@ -247,7 +248,7 @@ export default function Home() {
                 <i className="fa-solid fa-magnifying-glass" /> بحث سريع
               </button>
             </form>
-          </FadeIn>
+          </ScrollReveal>
         </div>
       </section>
 
@@ -255,14 +256,13 @@ export default function Home() {
       <MetricsStrip />
 
       {/* === SERVICE STRIP (as you had, with subtle lift) === */}
-      <section className="section section-muted">
+    <section className="section section-muted">
         <div className="container">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-bold text-lg">خدمات تكمل حفلِك</h2>
             <Link className="text-[#2563EB]" href="/catering">عرض جميع الخدمات</Link>
           </div>
-
-          <Stagger>
+      <Stagger>
             <div className="grid-4">
               {[
                 { href: "/catering", icon: "fa-utensils", title: "الضيافة / الكيترنغ", desc: "قوائم لكل فرد (رجال/نساء)." },
@@ -328,14 +328,17 @@ export default function Home() {
                   <HoverLift>
                     <Link href={`/halls/${h.slug}`} className="card block">
                       <div className="relative h-44">
-                        <Image
-                          src={h.img}
-                          alt={h.name}
-                          fill
-                          sizes="(max-width: 768px) 100vw, 33vw"
-                          className="object-cover"
-                          priority={i === 0}
-                        />
+                        <div className="absolute inset-0">
+                          {/* use fallback image to avoid dead-looking cards if remote images fail */}
+                          <FallbackImage
+                            src={h.img}
+                            alt={h.name}
+                            fill
+                            sizes="(max-width: 768px) 100vw, 33vw"
+                            className="object-cover"
+                            priority={i === 0}
+                          />
+                        </div>
                       </div>
                       <div className="p-4">
                         <h3 className="font-bold">{h.name}</h3>
