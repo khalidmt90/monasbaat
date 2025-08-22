@@ -7,6 +7,7 @@ import { AuthProvider } from "@/components/AuthProvider";
 import Header from "@/components/Header";
 import ClientTransition from "@/components/ClientTransition";
 import RouteProgress from "@/components/RouteProgress";
+import IdlePrefetch from "@/components/IdlePrefetch";
 
 const tajawal = Tajawal({
   subsets: ["arabic"],
@@ -24,11 +25,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="bg-white text-gray-900 antialiased">
         <Providers>
           <AuthProvider>
+            <a href="#main" className="skip-link">تجاوز إلى المحتوى</a>
             <RouteProgress />
             <Header />
-            <main className="pt-20">{/* offset for fixed header */}
+            <main id="main" className="pt-20">{/* offset for fixed header */}
               <ClientTransition>{children}</ClientTransition>
             </main>
+            <IdlePrefetch />
           </AuthProvider>
         </Providers>
       </body>

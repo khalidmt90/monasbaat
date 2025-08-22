@@ -1,26 +1,15 @@
-// components/home/VendorMarquee.tsx
 "use client";
 import { useEffect, useRef } from "react";
 
-const logos = [
-  "🎥 التصوير",
-  "🎀 الديكور",
-  "🍽️ الضيافة",
-  "☕ القهوة",
-  "🎤 الصوتيات",
-  "🚗 الفاليه",
-];
+const logos = ["🎥 التصوير", "🎀 الديكور", "🍽️ الضيافة", "☕ القهوة", "🎤 الصوتيات", "🚗 الفاليه"];
 
 export default function VendorMarquee() {
   const ref = useRef<HTMLDivElement>(null);
-
-  // Duplicate content for seamless loop
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    el.innerHTML = el.innerHTML + el.innerHTML;
+    el.innerHTML = el.innerHTML + el.innerHTML; // duplicate for seamless loop
   }, []);
-
   return (
     <section className="py-10 bg-[#0f1220] text-white overflow-hidden">
       <div className="container">

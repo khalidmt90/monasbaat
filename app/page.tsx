@@ -6,9 +6,27 @@ import Image from "next/image";
 import { useRef, useEffect } from "react";
 import { motion, useScroll, useTransform, animate } from "framer-motion";
 import { FadeIn, HoverLift, Stagger, Item, ParallaxBanner } from "@/components/Animated";
-import TypeReveal from "@/components/TypeReveal";
+import dynamic from "next/dynamic";
+import { CardSkeleton, Skeleton } from "@/components/Skeleton";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import FallbackImage from "@/components/FallbackImage";
+import { AutoStagger } from "@/components/AutoStagger";
+
+// Dynamic heavy components (code-split)
+const TypeReveal = dynamic(() => import("@/components/TypeReveal"), { loading: () => <Skeleton className="h-14 w-3/4 mx-auto" /> });
+const ParallaxCards = dynamic(() => import("@/components/home/ParallaxCards"), {
+  loading: () => (
+    <section className="section">
+      <div className="container grid md:grid-cols-2 gap-4">
+        <Skeleton className="h-60 md:h-80 w-full" />
+        <Skeleton className="h-60 md:h-80 w-full" />
+      </div>
+    </section>
+  ),
+});
+const VendorMarquee = dynamic(() => import("@/components/home/VendorMarquee"), {
+  loading: () => <div className="py-10 bg-[#0f1220] text-white opacity-60 text-center text-sm">…</div>,
+});
 
 /* -------------------------
    Sticky hero (shrinks on scroll)
@@ -136,67 +154,6 @@ function MetricsStrip() {
 /* -------------------------
    Dual Parallax Banners
 -------------------------- */
-function ParallaxCards() {
-  return (
-    <section className="section">
-      <div className="container">
-        <div className="grid md:grid-cols-2 gap-4">
-          <ParallaxBanner
-            image="https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=2000&auto=format&fit=crop"
-            height="h-60 md:h-80"
-          >
-            <div className="p-5 md:p-6 text-white drop-shadow">
-              <h3 className="font-bold text-xl">ابحث عن القاعة المثالية</h3>
-              <p className="text-white/90 mt-1">فلترة بالمدينة، الفترة، السعة (رجال/نساء)، مع تسعير فوري وحاسبة تكاليف.</p>
-              <Link href="/halls" className="btn btn-primary mt-3">تصفح القاعات</Link>
-            </div>
-          </ParallaxBanner>
-
-          <ParallaxBanner
-            image="https://images.unsplash.com/photo-1523359346063-d879354c0ea5?q=80&w=2000&auto=format&fit=crop"
-            height="h-60 md:h-80"
-          >
-            <div className="p-5 md:p-6 text-white drop-shadow">
-              <h3 className="font-bold text-xl">أكمل التفاصيل في سلة واحدة</h3>
-              <p className="text-white/90 mt-1">أضف ديكور، تصوير (رجال/نساء)، ضيافة، قهوة — ثم أكّد الطلب دفعة واحدة.</p>
-              <div className="flex flex-wrap gap-2 mt-3">
-                <Link href="/decor" className="btn btn-ghost">الديكور</Link>
-                <Link href="/photography" className="btn btn-ghost">التصوير</Link>
-                <Link href="/catering" className="btn btn-ghost">الضيافة</Link>
-              </div>
-            </div>
-          </ParallaxBanner>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* -------------------------
-   Vendor marquee (infinite)
--------------------------- */
-function VendorMarquee() {
-  const items = ["🎥 التصوير", "🎀 الديكور", "🍽️ الضيافة", "☕ القهوة", "🎤 الصوتيات", "🚗 الفاليه"];
-  return (
-    <section className="py-10 bg-[#0f1220] text-white overflow-hidden">
-      <div className="container">
-        <div className="text-center mb-4">
-          <h3 className="text-xl font-bold">شركاؤنا من مزودي الخدمات</h3>
-          <p className="text-gray-300">أفضل مزودي التصوير، الضيافة، الديكور، القهوة…</p>
-        </div>
-        <div className="relative">
-          <div className="marquee flex whitespace-nowrap gap-6 text-2xl opacity-90">
-            {items.concat(items).map((l, i) => (
-              <span key={i} className="px-4 py-2 rounded-xl bg-white/10 border border-white/10">
-                {l}
-              </span>
-            ))}
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
 
 export default function Home() {
   return (
@@ -256,14 +213,13 @@ export default function Home() {
       <MetricsStrip />
 
       {/* === SERVICE STRIP (as you had, with subtle lift) === */}
-    <section className="section section-muted">
+  <section className="section section-muted">
         <div className="container">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-bold text-lg">خدمات تكمل حفلِك</h2>
             <Link className="text-[#2563EB]" href="/catering">عرض جميع الخدمات</Link>
           </div>
-      <Stagger>
-            <div className="grid-4">
+      <AutoStagger className="grid-4">
               {[
                 { href: "/catering", icon: "fa-utensils", title: "الضيافة / الكيترنغ", desc: "قوائم لكل فرد (رجال/نساء)." },
                 { href: "/decor", icon: "fa-wand-magic-sparkles", title: "الديكور", desc: "حزم المسرح والطاولات والزهور." },
@@ -282,9 +238,8 @@ export default function Home() {
                     </Link>
                   </HoverLift>
                 </Item>
-              ))}
-            </div>
-          </Stagger>
+        ))}
+      </AutoStagger>
         </div>
       </section>
 
@@ -299,8 +254,7 @@ export default function Home() {
             <Link className="text-[#2563EB]" href="/halls">عرض الكل</Link>
           </div>
 
-          <Stagger>
-            <div className="grid-3">
+          <AutoStagger className="grid-3">
               {[
                 {
                   slug: "al-yakout",
@@ -353,9 +307,8 @@ export default function Home() {
                     </Link>
                   </HoverLift>
                 </Item>
-              ))}
-            </div>
-          </Stagger>
+        ))}
+      </AutoStagger>
         </div>
       </section>
 
@@ -365,8 +318,7 @@ export default function Home() {
       {/* === TRUST STRIP (as you had) === */}
       <section className="section section-muted">
         <div className="container">
-          <Stagger>
-            <div className="grid-4">
+          <AutoStagger className="grid-4">
               {[
                 { icon: "fa-shield-halved", title: "موثوقة", text: "تحقق إداري + مراجعات بعد المناسبة." },
                 { icon: "fa-receipt", title: "تسعير واضح", text: "تفصيل القاعة + الضيافة + الإضافات." },
@@ -380,9 +332,8 @@ export default function Home() {
                     <p className="text-gray-600 mt-1">{b.text}</p>
                   </div>
                 </Item>
-              ))}
-            </div>
-          </Stagger>
+        ))}
+      </AutoStagger>
         </div>
       </section>
 

@@ -4,12 +4,17 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { useScrollDirection } from "@/components/hooks/useScrollDirection";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
+import ThemeToggle from "@/components/ThemeToggle";
 
 export default function Header() {
   const { direction, y } = useScrollDirection();
   const [open, setOpen] = useState(false);
   const hidden = direction === "down" && y > 120;
+  const pathname = usePathname();
+  // close mobile panel on route change
+  useEffect(() => { setOpen(false); }, [pathname]);
   return (
     <motion.header
       initial={false}
@@ -32,7 +37,8 @@ export default function Header() {
           <Link href="/vendors" className="nav-link">مزودون</Link>
           <Link href="/contact" className="nav-link">تواصل</Link>
         </nav>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1 sm:gap-3">
+          <ThemeToggle />
           <Link href="/auth/login" className="btn btn-ghost hidden sm:inline-flex">تسجيل دخول</Link>
           <Link href="/auth/register" className="btn btn-primary">انضم</Link>
           <button aria-label="القائمة" className="md:hidden btn btn-ghost !p-2" onClick={() => setOpen(o => !o)}>

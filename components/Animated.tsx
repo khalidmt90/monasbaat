@@ -1,7 +1,7 @@
 "use client";
 
 import { ReactNode, useRef } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
 
 export function FadeIn({ children, delay = 0, y = 16 }: { children: ReactNode; delay?: number; y?: number }) {
   return (
@@ -63,8 +63,9 @@ export function ParallaxBanner({
   children?: ReactNode;
 }) {
   const ref = useRef<HTMLDivElement | null>(null);
+  const reduce = useReducedMotion();
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
-  const y = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
+  const y = useTransform(scrollYProgress, [0, 1], ["0%", reduce ? "0%" : "30%"]);
 
   return (
     <div ref={ref} className={`relative ${height} overflow-hidden rounded-2xl`}>
