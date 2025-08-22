@@ -46,6 +46,18 @@ input.input:focus, select.select:focus, textarea:focus { outline:none; border-co
 .dark .nav-link::after{background:#fff;}
 .dark .input{background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.2);color:#fff;}
 .dark .input:focus{border-color:#6366f1;box-shadow:0 0 0 4px rgba(99,102,241,.25);}
+/* improve dark contrast for form elements & placeholders */
+.dark .input{background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.28);}
+.dark .input::placeholder{color:#94a3b8;}
+.dark label,.dark .label{color:#cbd5e1;}
+.dark .card{border:1px solid rgba(255,255,255,0.08);} /* subtle outline for separation */
+.dark .btn-primary{background:#4f46e5;} /* slightly deeper for contrast */
+.dark .btn-primary:hover{background:#4338ca;}
+/* badge / pill adjustments if any use bg with low contrast */
+.pill, .badge{display:inline-flex;align-items:center;gap:.35rem;font-size:.75rem;font-weight:500;padding:.4rem .9rem;border-radius:9999px;background:linear-gradient(90deg,#312e81,#4338ca);color:#fff;}
+.dark .pill,.dark .badge{background:linear-gradient(90deg,#4338ca,#6366f1);} 
+/* placeholder globally */
+.dark ::placeholder{color:#94a3b8;}
 
 /* reduced motion: turn off marquee scroll & heavy parallax */
 @media (prefers-reduced-motion: reduce){
