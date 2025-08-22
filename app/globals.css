@@ -12,3 +12,41 @@ body { @apply bg-white text-gray-900 antialiased; }
 .input { @apply w-full rounded-xl border border-gray-300 px-3 py-2; }
 .label { @apply block mb-1 text-sm text-gray-700; }
 .field { @apply grid gap-1; }
+
+:root{
+	/* color tokens (do not rename) */
+	--color-bg: 255 255 255;
+	--color-ink: 17 24 39;
+	--color-muted: 107 114 128;
+
+	/* motion tokens */
+	--easing-standard: cubic-bezier(.2,.9,.2,1);
+	--easing-decelerate: cubic-bezier(.0,.0,.2,1);
+	--dur-quick: 150ms;
+	--dur-standard: 200ms;
+
+	/* focus */
+	--focus-ring: 3px;
+	--focus-color: 17 24 39;
+
+	/* safe area */
+	--safe-top: env(safe-area-inset-top);
+	--safe-bottom: env(safe-area-inset-bottom);
+}
+
+/* fluid type utilities */
+.text-fluid-sm{font-size:clamp(14px,1.2vw,16px);line-height:1.5}
+.text-fluid-md{font-size:clamp(16px,1.8vw,18px);line-height:1.5}
+.text-fluid-lg{font-size:clamp(20px,2.6vw,24px);line-height:1.45}
+
+/* accessible focus ring */
+.focus-ring:focus{outline:transparent;box-shadow:0 0 0 var(--focus-ring) rgb(var(--focus-color)/0.15),0 0 0 calc(var(--focus-ring) + 2px) rgb(var(--focus-color)/0.08);border-radius:0.75rem}
+
+/* motion respectful */
+@media (prefers-reduced-motion: reduce){
+	*{transition:none!important;animation:none!important}
+}
+
+/* ensure minimum tap target */
+.touch-target{min-height:44px;min-width:44px;padding:8px}
+
