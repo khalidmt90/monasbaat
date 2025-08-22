@@ -15,7 +15,7 @@ export type RegisterStartInput =
 /** Legacy registration response shape expected by older pages */
 export type RegisterStartResult = {
   otpSent: boolean;
-  mockCode?: string; // for local/testing display
+  mockCode: string; // <-- always a string to satisfy setState<string>
 };
 
 /** Legacy OTP verify response */
@@ -56,23 +56,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     ((session?.user as any)?.role as Role | undefined) ??
     null;
 
-  // --- No-op/mock implementations to satisfy legacy pages ---
+  // --- Mock implementations to satisfy legacy pages until real API exists ---
   const registerStart = React.useCallback(
     async (payload: RegisterStartInput): Promise<RegisterStartResult> => {
-      // Accept both the object form and a simple string form
       if (typeof payload === "string") {
         console.info("[AuthProvider] registerStart (string) noop:", { payload });
       } else {
         const { name, phone, role } = payload;
-        console.info("[AuthProvider] registerStart (object) noop:", {
-          name,
-          phone,
-          role,
-        });
+        console.info("[AuthProvider] registerStart (object) noop:", { name, phone, role });
       }
-      // TODO: replace with real API call, e.g.:
-      // const res = await fetch("/api/auth/register/start", { method: "POST", body: JSON.stringify(payload) })
-      // return await res.json();
+      // TODO: replace with real API call
       return { otpSent: true, mockCode: "123456" };
     },
     []
@@ -81,14 +74,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const verifyOtp = React.useCallback(
     async (emailOrPhone: string, code: string): Promise<VerifyOtpResult> => {
       console.info("[AuthProvider] verifyOtp noop:", { emailOrPhone, code });
-      // TODO: replace with real API call, e.g.:
-      // const res = await fetch("/api/auth/register/verify", { method: "POST", body: JSON.stringify({ emailOrPhone, code }) })
-      // return await res.json();
+      // TODO: replace with real API call
       return { verified: code === "123456" };
     },
     []
   );
-  // ---------------------------------------------------------
+  // -------------------------------------------------------------------------
 
   const value: AuthContext = {
     status,
