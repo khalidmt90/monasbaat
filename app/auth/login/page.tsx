@@ -1,4 +1,6 @@
 // app/auth/login/page.tsx
+export const dynamic = "force-dynamic";
+
 import LoginForm from "./LoginForm";
 
 export default function LoginPage() {
