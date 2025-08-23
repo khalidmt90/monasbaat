@@ -1,165 +1,65 @@
-// app/page.tsx
-"use client";
-
+// app/page.tsx (converted to server component for feature flag SSR)
 import Link from "next/link";
 import Image from "next/image";
-import { useRef, useEffect } from "react";
-import { motion, useScroll, useTransform, animate } from "framer-motion";
-import { FadeIn, HoverLift, Stagger, Item, ParallaxBanner } from "@/components/Animated";
-import dynamic from "next/dynamic";
-import { CardSkeleton, Skeleton } from "@/components/Skeleton";
-import { ScrollReveal } from "@/components/ScrollReveal";
+import { loadFeatureFlags } from "@/lib/featureFlags";
+import { loadHomeContent, t, HomeContent } from "@/lib/content";
+import { prisma } from "@/lib/prisma";
 import FallbackImage from "@/components/FallbackImage";
 import { AutoStagger } from "@/components/AutoStagger";
+import { HoverLift, Item } from "@/components/Animated";
+import { ScrollReveal } from "@/components/ScrollReveal";
+// (No client-only animation on this simplified hero)
 
-// Dynamic heavy components (code-split)
-const TypeReveal = dynamic(() => import("@/components/TypeReveal"), { loading: () => <Skeleton className="h-14 w-3/4 mx-auto" /> });
-const ParallaxCards = dynamic(() => import("@/components/home/ParallaxCards"), {
-  loading: () => (
-    <section className="section">
-      <div className="container grid md:grid-cols-2 gap-4">
-        <Skeleton className="h-60 md:h-80 w-full" />
-        <Skeleton className="h-60 md:h-80 w-full" />
-      </div>
-    </section>
-  ),
-});
-const VendorMarquee = dynamic(() => import("@/components/home/VendorMarquee"), {
-  loading: () => <div className="py-10 bg-[#0f1220] text-white opacity-60 text-center text-sm">…</div>,
-});
+// (Removed heavy dynamic components for lean Phase 0 landing)
 
-/* -------------------------
-   Sticky hero (shrinks on scroll)
--------------------------- */
-function StickyHero() {
-  const ref = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start start", "end start"], // when hero ends, animation done
-  });
-  const scale = useTransform(scrollYProgress, [0, 1], [1, 0.9]);
-  const opacity = useTransform(scrollYProgress, [0, 1], [1, 0.85]);
-  const y = useTransform(scrollYProgress, [0, 1], [0, -24]);
+// (Hero simplified; TypeReveal not used to reduce bundle size)
 
-  return (
-    <section ref={ref} className="section pt-6">
-      <div className="container">
-        <motion.div style={{ scale, opacity, y }} className="rounded-2xl overflow-hidden shadow-[0_10px_40px_rgba(0,0,0,.22)]">
-          <div className="h-[68vh] md:h-[82vh] relative">
-            <div className="absolute inset-0 -z-10">
-              <Image
-                src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=2000&auto=format&fit=crop"
-                alt="Hero background"
-                fill
-                sizes="100vw"
-                className="object-cover"
-                priority
-              />
-              <div className="absolute inset-0 bg-black/35" />
-            </div>
-            <div className="relative h-full grid place-items-center text-center text-white px-6">
-              <div className="max-w-2xl">
-                <motion.div
-                  initial={{ y: 16, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ duration: 0.6 }}
-                  className="inline-flex items-center gap-2 bg-white/10 backdrop-blur rounded-full px-3 py-1 text-sm"
-                >
-                  <span className="w-1.5 h-1.5 rounded-full bg-gold" />
-                  منصة سعودية — حجوزات القاعات والخدمات
-                </motion.div>
-
-                <TypeReveal
-                  text="كل ما تحتاجه لحفلٍ مثالي — في منصة واحدة"
-                  className="text-3xl md:text-5xl font-extrabold drop-shadow mt-4 leading-[1.15] tracking-tight"
-                  speed={0.04}
-                  delay={0.1}
-                />
-
-                <motion.p
-                  initial={{ y: 16, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ duration: 0.6, delay: 0.16 }}
-                  className="mt-3 text-white/90 text-lg"
-                >
-                  اكتشف القاعات، أضف الضيافة والديكور والتصوير والقهوة والشاي. تسعير واضح وتجربة سهلة.
-                </motion.p>
-
-                <motion.div
-                  initial={{ y: 16, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ duration: 0.6, delay: 0.24 }}
-                  className="mt-6 flex items-center justify-center gap-3"
-                >
-                  <Link className="btn btn-gold" href="/halls">
-                    <i className="fa-solid fa-magnifying-glass" /> ابحث عن قاعة
-                  </Link>
-                  <Link className="btn btn-ghost" href="/corporate">
-                    <i className="fa-solid fa-building" /> حلول الشركات
-                  </Link>
-                </motion.div>
-              </div>
-            </div>
-
-            {/* soft gradient to page */}
-            <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white to-transparent" />
-          </div>
-        </motion.div>
-      </div>
-    </section>
-  );
-}
-
-/* -------------------------
-   Animated counters (metrics)
--------------------------- */
-function Metric({ value, label, delay = 0 }: { value: number; label: string; delay?: number }) {
-  const ref = useRef<HTMLSpanElement>(null);
-  useEffect(() => {
-    if (!ref.current) return;
-    const controls = animate(0, value, {
-      duration: 1.1,
-      delay,
-      onUpdate: (v) => {
-        if (ref.current) ref.current.textContent = Math.round(v).toLocaleString("ar-SA");
-      },
-    });
-    return () => controls.stop();
-  }, [value, delay]);
-  return (
-    <div className="card p-5 text-center">
-      <div className="text-3xl font-extrabold text-ink">
-        <span ref={ref} />+
-      </div>
-      <div className="text-gray-600 mt-1">{label}</div>
-    </div>
-  );
-}
-
-function MetricsStrip() {
-  return (
-    <section className="section section-muted">
-      <div className="container">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <Metric value={320} label="قاعات متاحة" />
-          <Metric value={140} label="مزودو خدمات" delay={0.05} />
-          <Metric value={5200} label="حجوزات ناجحة" delay={0.1} />
-          <Metric value={47} label="متوسط تقييم ×10" delay={0.15} />
-        </div>
-      </div>
-    </section>
-  );
-}
+// (Metrics removed for Phase 0 focus)
 
 /* -------------------------
    Dual Parallax Banners
 -------------------------- */
 
-export default function Home() {
+export default async function Home() {
+  const prismaAny = prisma as any;
+  const [flags, content, cities, featuredHalls] = await Promise.all([
+    loadFeatureFlags(),
+    loadHomeContent(),
+    prismaAny.city.findMany({ where:{ active:true }, select:{ id:true, code:true, nameAr:true, nameEn:true } }),
+    prismaAny.hall.findMany({ where:{ isActive:true, isVerified:true }, orderBy:{ createdAt:'desc' }, take:6, select:{ slug:true, name:true, nameAr:true, city:true, basePrice:true, images:true } })
+  ]);
+  const hallsEnabled = flags.services.halls.enabled;
+  const dhabaehEnabled = flags.services.dhabaeh.enabled;
+  const hero = content.hero || {};
+  const lang:'ar'|'en' = 'ar';
+
   return (
     <>
-      {/* === STICKY HERO (shrink on scroll) === */}
-      <StickyHero />
+      {/* Hero replaced with simpler static hero if dynamic component not loaded */}
+      <section className="section pt-8">
+        <div className="container">
+          <div className="grid md:grid-cols-2 gap-6">
+            {hallsEnabled && (
+              <Link href="/halls" className="group relative rounded-2xl overflow-hidden shadow-lg aspect-[4/3] md:aspect-[5/4] flex">
+                <Image fill priority src={hero.halls?.image || 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=1600&auto=format&fit=crop'} alt={t(hero.halls?.headline,lang)} className="object-cover transition-transform duration-500 group-hover:scale-105" />
+                <div className="absolute inset-0 bg-black/50 p-6 flex flex-col justify-end text-white">
+                  <h2 className="text-xl md:text-2xl font-bold leading-snug">{t(hero.halls?.headline,lang)}</h2>
+                  <div className="mt-3 inline-flex items-center gap-2 btn btn-gold !px-4 w-max"><i className="fa-solid fa-magnifying-glass" /> {t(hero.halls?.cta,lang)}</div>
+                </div>
+              </Link>
+            )}
+            {dhabaehEnabled && (
+              <Link href="/dhabaeh" className="group relative rounded-2xl overflow-hidden shadow-lg aspect-[4/3] md:aspect-[5/4] flex">
+                <Image fill src={hero.dhabaeh?.image || 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=1600&auto=format&fit=crop'} alt={t(hero.dhabaeh?.headline,lang)} className="object-cover transition-transform duration-500 group-hover:scale-105" />
+                <div className="absolute inset-0 bg-black/50 p-6 flex flex-col justify-end text-white">
+                  <h2 className="text-xl md:text-2xl font-bold leading-snug">{t(hero.dhabaeh?.headline,lang)}</h2>
+                  <div className="mt-3 inline-flex items-center gap-2 btn btn-primary !px-4 w-max"><i className="fa-solid fa-drumstick-bite" /> {t(hero.dhabaeh?.cta,lang)}</div>
+                </div>
+              </Link>
+            )}
+          </div>
+        </div>
+      </section>
 
       {/* === QUICK SEARCH (kept as is, wrapped with subtle fade) === */}
     <section className="section">
@@ -168,11 +68,9 @@ export default function Home() {
             <form action="/halls" className="card p-4 grid gap-3 md:grid-cols-2">
               <label className="field">
                 <span className="label">المدينة</span>
-                <select className="select" required>
-                  <option>الرياض</option>
-                  <option>جدة</option>
-                  <option>الدمام</option>
-                  <option>مكة</option>
+                <select className="select" required defaultValue="">
+                  <option value="" disabled>اختر المدينة</option>
+                  {cities.map((c:any)=> <option key={c.id} value={c.code}>{c.nameAr}</option>)}
                 </select>
               </label>
 
@@ -209,45 +107,56 @@ export default function Home() {
         </div>
       </section>
 
-      {/* === METRICS (animated counters) === */}
-      <MetricsStrip />
-
-      {/* === SERVICE STRIP (as you had, with subtle lift) === */}
-  <section className="section section-muted">
+      {/* HOW IT WORKS */}
+      <section className="section">
         <div className="container">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-bold text-lg">خدمات تكمل حفلِك</h2>
-            <Link className="text-[#2563EB]" href="/catering">عرض جميع الخدمات</Link>
+          <h2 className="font-bold text-lg mb-6">{lang==='ar'? 'كيف تعمل المنصة':'How it Works'}</h2>
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="card p-5">
+              <h3 className="font-bold mb-3">{lang==='ar'? 'حجز القاعات':'Halls'}</h3>
+              <ol className="space-y-2 text-sm counter-decimal list-inside">
+                {(content.how?.halls?.steps||[]).map((s: any, i: number)=>(<li key={i}>{t(s.text,lang)}</li>))}
+              </ol>
+            </div>
+            <div className="card p-5">
+              <h3 className="font-bold mb-3">{lang==='ar'? 'الذبايح':'Dhabaeh'}</h3>
+              <ol className="space-y-2 text-sm list-inside">
+                {(content.how?.dhabaeh?.steps||[]).map((s: any,i: number)=>(<li key={i}>{t(s.text,lang)}</li>))}
+              </ol>
+            </div>
           </div>
-      <AutoStagger className="grid-4">
-              {[
-                { href: "/catering", icon: "fa-utensils", title: "الضيافة / الكيترنغ", desc: "قوائم لكل فرد (رجال/نساء)." },
-                { href: "/decor", icon: "fa-wand-magic-sparkles", title: "الديكور", desc: "حزم المسرح والطاولات والزهور." },
-                { href: "/photography", icon: "fa-camera", title: "التصوير", desc: "رجال / نساء — فوتو + فيديو." },
-                { href: "/catering", icon: "fa-mug-hot", title: "قهوة وشاي", desc: "طاقم ضيافة محترف." },
-              ].map((s, i) => (
-                <Item key={i}>
-                  <HoverLift>
-                    <Link href={s.href} className="card p-5 block group">
-                      <div className="text-2xl"><i className={`fa-solid ${s.icon}`} /></div>
-                      <h3 className="font-bold mt-2">{s.title}</h3>
-                      <p className="text-gray-600 mt-1">{s.desc}</p>
-                      <div className="mt-3 text-sm text-[#2563EB] opacity-0 group-hover:opacity-100 transition-opacity">
-                        استكشاف <i className="fa-solid fa-arrow-left-long" />
-                      </div>
-                    </Link>
-                  </HoverLift>
-                </Item>
-        ))}
-      </AutoStagger>
         </div>
       </section>
 
-      {/* === PARALLAX BANNERS (2 cards) === */}
-      <ParallaxCards />
+      {/* SERVICEABLE CITIES */}
+      <section className="section">
+        <div className="container">
+          <h2 className="font-bold text-lg mb-4">{t(content.cities?.tagline,lang) || (lang==='ar'? 'المدن':'Cities')}</h2>
+          <div className="flex flex-wrap gap-3">
+            {cities.map((c: any)=> <div key={c.id} className="px-4 py-2 rounded-full bg-gray-100 text-sm">{lang==='ar'? c.nameAr : (c.nameEn||c.nameAr)}</div>)}
+            {cities.length===0 && <div className="text-xs text-gray-500">—</div>}
+          </div>
+        </div>
+      </section>
+
+      {/* TRUST SIGNALS */}
+      <section className="section">
+        <div className="container">
+          <h2 className="font-bold text-lg mb-6">{lang==='ar'? 'لماذا نحن':'Why Us'}</h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {(content.trust?.signals||[]).map((s: any,i: number)=>(
+              <div key={i} className="card p-4 space-y-2 text-sm">
+                <div className="flex items-center gap-2 font-semibold"><span className="text-primary">{s.icon? <i className={`fa-solid fa-${s.icon}`} />: '★'}</span>{t(s.title,lang)}</div>
+                {s.desc && <p className="text-gray-600 leading-relaxed text-xs">{t(s.desc,lang)}</p>}
+              </div>
+            ))}
+            {(content.trust?.signals||[]).length===0 && <div className="text-xs text-gray-500">—</div>}
+          </div>
+        </div>
+      </section>
 
       {/* === FEATURED HALLS (as you had) === */}
-      <section className="section">
+  <section className="section">
         <div className="container">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-bold text-lg">قاعات مميزة</h2>
@@ -255,29 +164,7 @@ export default function Home() {
           </div>
 
           <AutoStagger className="grid-3">
-              {[
-                {
-                  slug: "al-yakout",
-                  city: "الرياض",
-                  name: "قاعة الياقوت",
-                  price: 12000,
-                  img: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=1600&auto=format&fit=crop",
-                },
-                {
-                  slug: "al-fayrouz",
-                  city: "جدة",
-                  name: "قاعة الفيروز",
-                  price: 9500,
-                  img: "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=1600&auto=format&fit=crop",
-                },
-                {
-                  slug: "al-massa",
-                  city: "مكة",
-                  name: "قاعة الماسة",
-                  price: 14000,
-                  img: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=1600&auto=format&fit=crop",
-                },
-              ].map((h, i) => (
+                  {featuredHalls.map((h:any, i:number) => (
                 <Item key={i}>
                   <HoverLift>
                     <Link href={`/halls/${h.slug}`} className="card block">
@@ -285,8 +172,8 @@ export default function Home() {
                         <div className="absolute inset-0">
                           {/* use fallback image to avoid dead-looking cards if remote images fail */}
                           <FallbackImage
-                            src={h.img}
-                            alt={h.name}
+                            src={(Array.isArray(h.images)&&h.images[0]) || 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=1600&auto=format&fit=crop'}
+                            alt={h.nameAr || h.name}
                             fill
                             sizes="(max-width: 768px) 100vw, 33vw"
                             className="object-cover"
@@ -295,10 +182,10 @@ export default function Home() {
                         </div>
                       </div>
                       <div className="p-4">
-                        <h3 className="font-bold">{h.name}</h3>
-                        <p className="text-gray-500 text-sm mt-1">{h.city} • سعة 500+</p>
+                        <h3 className="font-bold">{h.nameAr || h.name}</h3>
+                        <p className="text-gray-500 text-sm mt-1">{h.city}</p>
                         <div className="mt-2">
-                          ابتداءً من <b>{h.price.toLocaleString("ar-SA")}</b> ر.س
+                          ابتداءً من <b>{(h.basePrice||0).toLocaleString('ar-SA')}</b> ر.س
                         </div>
                         <div className="mt-3 btn btn-ghost w-max">
                           <i className="fa-regular fa-eye" /> عرض التفاصيل
@@ -312,49 +199,9 @@ export default function Home() {
         </div>
       </section>
 
-      {/* === VENDOR MARQUEE (infinite loop) === */}
-      <VendorMarquee />
 
-      {/* === TRUST STRIP (as you had) === */}
-      <section className="section section-muted">
-        <div className="container">
-          <AutoStagger className="grid-4">
-              {[
-                { icon: "fa-shield-halved", title: "موثوقة", text: "تحقق إداري + مراجعات بعد المناسبة." },
-                { icon: "fa-receipt", title: "تسعير واضح", text: "تفصيل القاعة + الضيافة + الإضافات." },
-                { icon: "fa-bolt", title: "سريعة", text: "بحث، تصفية، وحجز بخطوات قليلة." },
-                { icon: "fa-mobile-screen", title: "متوافقة مع الجوال", text: "تجربة ممتازة على الشاشات الصغيرة." },
-              ].map((b, i) => (
-                <Item key={i}>
-                  <div className="card p-5">
-                    <div className="text-2xl"><i className={`fa-solid ${b.icon}`} /></div>
-                    <h3 className="font-bold mt-2">{b.title}</h3>
-                    <p className="text-gray-600 mt-1">{b.text}</p>
-                  </div>
-                </Item>
-        ))}
-      </AutoStagger>
-        </div>
-      </section>
 
-      {/* === CTA BANNER (as you had) === */}
-      <section className="section">
-        <div className="container">
-          <FadeIn>
-            <div className="card p-6 md:p-8 bg-gradient-to-br from-ivory to-white">
-              <div className="flex flex-col md:flex-row gap-4 md:items-center md:justify-between">
-                <div>
-                  <h3 className="text-xl font-extrabold">لديك قاعة أو خدمة وتريد عملاء أكثر؟</h3>
-                  <p className="text-gray-600 mt-1">انضم إلى منصة مناسبات وابدأ باستقبال الطلبات اليوم.</p>
-                </div>
-                <Link href="/vendors" className="btn btn-primary">
-                  <i className="fa-solid fa-store" /> انضم كمزود
-                </Link>
-              </div>
-            </div>
-          </FadeIn>
-        </div>
-      </section>
+  {/* CTA replaced with focused dual action already in hero (Phase 0) */}
     </>
   );
 }
