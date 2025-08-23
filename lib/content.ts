@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+// settings-commit-anchor: dynamic homepage content via GlobalConfig
 
 export type Localized = { ar?: string; en?: string };
 

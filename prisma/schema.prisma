@@ -1,3 +1,4 @@
+// settings-commit-anchor: schema includes GlobalConfig, FeatureFlag, Counter, and extended domain models
 generator client {
   provider = "prisma-client-js"
 }

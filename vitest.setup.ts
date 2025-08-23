@@ -1,4 +1,4 @@
-process.env.TEST_MODE = 'true';
+process.env.TEST_MODE = 'true'; // settings-commit-anchor: test db bootstrap & GlobalConfig seeds
 // Always force test DB (overwrite any existing)
 process.env.DATABASE_URL = 'file:./prisma/test.db';
 

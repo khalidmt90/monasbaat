@@ -1,3 +1,4 @@
+// settings-commit-anchor
 export type FeatureFlags = {
   services: {
     halls: { enabled: boolean };

@@ -1,6 +1,8 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
+// settings-commit-anchor: includes GlobalConfig & feature flags seed data
+
 const prisma = new PrismaClient();
 
 async function main() {
