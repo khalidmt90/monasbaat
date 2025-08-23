@@ -8,69 +8,84 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String
-  name      String?
-  role      String   @default("USER") // USER | ADMIN | VENDOR
-  phone     String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  vendor   Vendor?
-  bookings Booking[]
+  id            String        @id @default(cuid())
+  email         String        @unique
+  password      String
+  name          String?
+  role          String        @default("USER")
+  phone         String?
+  phoneVerified Boolean       @default(false) @map("phone_verified")
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  bookings      Booking[]
+  hallBookings  HallBooking[]
+  orders        Order[]
+  vendor        Vendor?
 }
 
 model Vendor {
-  id        String   @id @default(cuid())
-  userId    String   @unique
+  id        String    @id @default(cuid())
+  userId    String    @unique
   company   String?
-  status    String   @default("pending")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user   User      @relation(fields: [userId], references: [id])
-  halls  Hall[]
-  offers Service[]
+  status    String    @default("pending")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  halls     Hall[]
+  offers    Service[]
+  user      User      @relation(fields: [userId], references: [id])
 }
 
 model Hall {
-  id            String   @id @default(cuid())
-  slug          String   @unique
-  name          String
-  city          String
-  area          String?
-  menCapacity   Int      @default(0)
-  womenCapacity Int      @default(0)
-  basePrice     Int
-  sessions      Json // ["morning","evening","full"]
-  amenities     Json // ["parking","sound","lighting"]
-  images        Json // ["https://...","https://..."]
-  lat           Float?
-  lng           Float?
-  rating        Float?
-  reviewsCount  Int?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  vendorId String?
-  vendor   Vendor?   @relation(fields: [vendorId], references: [id])
-  bookings Booking[]
+  id               String        @id @default(cuid())
+  slug             String        @unique
+  name             String
+  nameAr           String?       @map("name_ar")
+  nameEn           String?       @map("name_en")
+  city             String
+  cityId           String?       @map("city_id")
+  address          String?
+  area             String?
+  menCapacity      Int           @default(0)
+  womenCapacity    Int           @default(0)
+  capacityMin      Int?          @map("capacity_min")
+  capacityMax      Int?          @map("capacity_max")
+  basePrice        Int           @map("base_price")
+  basePriceDecimal Int?          @map("base_price_decimal")
+  sessions         Json
+  amenities        Json
+  images           Json
+  photos           Json?         @map("photos")
+  descriptionAr    String?       @map("description_ar")
+  descriptionEn    String?       @map("description_en")
+  feeRules         Json?         @map("fee_rules")
+  isActive         Boolean       @default(true) @map("is_active")
+  isVerified       Boolean       @default(false) @map("is_verified")
+  lat              Float?
+  lng              Float?
+  rating           Float?
+  reviewsCount     Int?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  vendorId         String?
+  bookings         Booking[]
+  vendor           Vendor?       @relation(fields: [vendorId], references: [id])
+  hallBookings     HallBooking[]
+  slots            HallSlot[]
+  cityRef          City?         @relation(fields: [cityId], references: [id])
 }
 
 model Service {
   id        String   @id @default(cuid())
   vendorId  String?
-  type      String // catering|decor|photography|coffee
+  type      String
   title     String
   summary   String?
   price     Int
-  images    Json // array of urls
-  tags      Json // array of strings
+  images    Json
+  tags      Json
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  vendor Vendor? @relation(fields: [vendorId], references: [id])
+  vendor    Vendor?  @relation(fields: [vendorId], references: [id])
 }
 
 model Booking {
@@ -79,15 +94,345 @@ model Booking {
   hallId      String
   date        DateTime
   days        Int      @default(1)
-  session     String? // morning|evening|full
-  addons      Json // [{serviceId:"...", qty:1}]
+  session     String?
+  addons      Json
   status      String   @default("pending")
   transferRef String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  hall        Hall     @relation(fields: [hallId], references: [id])
+  user        User     @relation(fields: [userId], references: [id])
+}
 
-  user User @relation(fields: [userId], references: [id])
-  hall Hall @relation(fields: [hallId], references: [id])
+/// Phase 2: Discrete reservable time/dated slot for a hall
+model HallSlot {
+  id            String         @id @default(cuid())
+  hallId        String
+  date          DateTime
+  startTime     String         @map("start_time")
+  endTime       String         @map("end_time")
+  startMin      Int?           @map("start_min")
+  endMin        Int?           @map("end_min")
+  capacityLimit Int?           @map("capacity_limit")
+  capacity      Int?           @map("capacity")
+  priceOverride Int?           @map("price_override")
+  priceMinor    Int?           @map("price_minor")
+  status        HallSlotStatus @default(open)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  hallBookings  HallBooking[]
+  hall          Hall           @relation(fields: [hallId], references: [id])
+  slotLock      SlotLock?
+
+  @@unique([hallId, date, startTime, endTime])
+  @@index([hallId, date])
+}
+
+/// Phase 2: New hall booking model (keeps legacy Booking separate during transition)
+model HallBooking {
+  id          String            @id @default(cuid())
+  userId      String?
+  hallId      String
+  slotId      String?
+  orderId     String?
+  eventDate   DateTime          @map("event_date")
+  startTime   String            @map("start_time")
+  endTime     String            @map("end_time")
+  guests      Int               @default(0)
+  status      HallBookingStatus @default(pending)
+  pricingJson Json?             @map("pricing_json")
+  totalsJson  Json?             @map("totals_json")
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  addons      BookingAddon[]
+  order       Order?            @relation(fields: [orderId], references: [id])
+  slot        HallSlot?         @relation(fields: [slotId], references: [id])
+  hall        Hall              @relation(fields: [hallId], references: [id])
+  user        User?             @relation(fields: [userId], references: [id])
+
+  @@index([hallId, eventDate])
+  @@index([userId])
+}
+
+/// Phase 2: Mapping for animal age/weight/size pricing adjustments
+model AgeWeightMapping {
+  id                String   @id @default(cuid())
+  animalType        String   @map("animal_type")
+  animalId          String?  @map("animal_id")
+  ageId             String   @map("age_id")
+  sizeBandId        String?  @map("size_band_id")
+  estimatedWeightKg Int      @map("estimated_weight_kg")
+  basePriceModifier Int      @default(0) @map("base_price_modifier")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  animal            Animal?  @relation(fields: [animalId], references: [id])
+
+  @@unique([animalType, ageId])
+  @@unique([animalId, ageId])
+}
+
+/// Phase 2: Add-ons linked to hall bookings (e.g., dhabaeh)
+model BookingAddon {
+  id         String           @id @default(cuid())
+  bookingId  String
+  type       BookingAddonType
+  payload    Json
+  totalsJson Json?            @map("totals_json")
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+  booking    HallBooking      @relation(fields: [bookingId], references: [id])
+
+  @@index([bookingId])
+}
+
+model Animal {
+  id         String      @id @default(cuid())
+  code       String      @unique
+  nameAr     String
+  nameEn     String?
+  active     Boolean     @default(true)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  ages       Age[]
+  basePrices BasePrice[]
+  breeds     Breed[]
+  sizeBands  SizeBand[]
+  ageWeightMappings AgeWeightMapping[]
+}
+
+model Breed {
+  id         String      @id @default(cuid())
+  animalId   String
+  code       String
+  nameAr     String
+  nameEn     String?
+  active     Boolean     @default(true)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  basePrices BasePrice[]
+  animal     Animal      @relation(fields: [animalId], references: [id])
+
+  @@unique([animalId, code])
+  @@index([animalId])
+}
+
+model Age {
+  id         String      @id @default(cuid())
+  animalId   String
+  code       String
+  teethLabel String?
+  nameAr     String
+  nameEn     String?
+  active     Boolean     @default(true)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  animal     Animal      @relation(fields: [animalId], references: [id])
+  basePrices BasePrice[]
+
+  @@unique([animalId, code])
+  @@index([animalId])
+}
+
+model SizeBand {
+  id         String      @id @default(cuid())
+  animalId   String
+  code       String
+  labelAr    String
+  labelEn    String?
+  minWeight  Int?        @map("min_weight")
+  maxWeight  Int?        @map("max_weight")
+  active     Boolean     @default(true)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  basePrices BasePrice[]
+  animal     Animal      @relation(fields: [animalId], references: [id])
+
+  @@unique([animalId, code])
+  @@index([animalId])
+}
+
+model CutPreset {
+  id            String   @id @default(cuid())
+  code          String   @unique
+  nameAr        String
+  nameEn        String?
+  priceModifier Int      @default(0)
+  active        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model PackagingOption {
+  id            String   @id @default(cuid())
+  code          String   @unique
+  nameAr        String
+  nameEn        String?
+  priceModifier Int      @default(0)
+  active        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model CookingOption {
+  id            String   @id @default(cuid())
+  code          String   @unique
+  nameAr        String
+  nameEn        String?
+  priceModifier Int      @default(0)
+  active        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model SideOption {
+  id            String   @id @default(cuid())
+  code          String   @unique
+  nameAr        String
+  nameEn        String?
+  priceModifier Int      @default(0)
+  active        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model City {
+  id            String         @id @default(cuid())
+  code          String         @unique
+  nameAr        String
+  nameEn        String?
+  active        Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  branches      Branch[]
+  deliveryFees  DeliveryFee[]
+  deliverySlots DeliverySlot[]
+  deliveryWindows DeliveryWindow[]
+  cutoffRules     CutoffRule[]
+  slotCapacities  SlotCapacity[]
+  halls           Hall[]
+}
+
+model Branch {
+  id        String   @id @default(cuid())
+  cityId    String
+  code      String
+  nameAr    String
+  nameEn    String?
+  address   String?
+  phone     String?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  city      City     @relation(fields: [cityId], references: [id])
+
+  @@unique([cityId, code])
+  @@index([cityId])
+}
+
+model BasePrice {
+  id         String    @id @default(cuid())
+  animalId   String
+  breedId    String?
+  ageId      String?
+  sizeBandId String?
+  priceBase  Int       @default(0)
+  active     Boolean   @default(true)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  sizeBand   SizeBand? @relation(fields: [sizeBandId], references: [id])
+  age        Age?      @relation(fields: [ageId], references: [id])
+  breed      Breed?    @relation(fields: [breedId], references: [id])
+  animal     Animal    @relation(fields: [animalId], references: [id])
+
+  @@index([animalId])
+  @@index([breedId])
+  @@index([ageId])
+  @@index([sizeBandId])
+}
+
+model DeliveryFee {
+  id        String         @id @default(cuid())
+  cityId    String?
+  target    DeliveryTarget @default(HOME)
+  fee       Int            @default(0)
+  active    Boolean        @default(true)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  city      City?          @relation(fields: [cityId], references: [id])
+
+  @@index([cityId])
+  @@index([target])
+}
+
+model DeliverySlot {
+  id         String   @id @default(cuid())
+  cityId     String
+  date       DateTime
+  startTime  String   @map("start_time")
+  endTime    String   @map("end_time")
+  capacity   Int      @default(0)
+  cutoffTime String?  @map("cutoff_time")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  city       City     @relation(fields: [cityId], references: [id])
+
+  @@unique([cityId, date, startTime, endTime])
+  @@index([cityId, date])
+}
+
+// Phase 10.B: Delivery windows (time ranges clients can select per city)
+model DeliveryWindow {
+  id        String   @id @default(cuid())
+  cityId    String
+  labelAr   String   @map("label_ar")
+  labelEn   String?  @map("label_en")
+  startMin  Int      @map("start_min")
+  endMin    Int      @map("end_min")
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  city      City     @relation(fields: [cityId], references: [id])
+
+  @@index([cityId])
+}
+
+// Phase 10.B: Cutoff rules per city
+model CutoffRule {
+  id                String   @id @default(cuid())
+  cityId            String
+  sameDayCutoffMin  Int      @default(0) @map("same_day_cutoff_min")
+  nextDayCutoffMin  Int      @default(0) @map("next_day_cutoff_min")
+  leadTimeHours     Int      @default(0) @map("lead_time_hours")
+  active            Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  city              City     @relation(fields: [cityId], references: [id])
+
+  @@index([cityId])
+}
+
+// Phase 10.B: Slot capacity rules (baseline capacity by day-of-week & time range)
+model SlotCapacity {
+  id        String   @id @default(cuid())
+  cityId    String
+  dayOfWeek Int      @map("day_of_week") // 0=Sunday .. 6=Saturday
+  startMin  Int      @map("start_min")
+  endMin    Int      @map("end_min")
+  capacity  Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  city      City     @relation(fields: [cityId], references: [id])
+
+  @@index([cityId, dayOfWeek])
+}
+
+model GlobalConfig {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
 }
 
 model Banner {
@@ -102,4 +447,256 @@ model Banner {
   sort      Int      @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model FeatureFlag {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Order {
+  id             String          @id @default(cuid())
+  userId         String?
+  status         String          @default("pending_payment")
+  orderRef       String?         @unique @map("order_ref")
+  context        String?
+  customerName   String?         @map("customer_name")
+  customerEmail  String?         @map("customer_email")
+  customerPhone  String?         @map("customer_phone")
+  totalsJson     Json?           @map("totals_json")
+  taxLines       Json?           @map("tax_lines")
+  expiresAt      DateTime?       @map("expires_at")
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  hallBookings   HallBooking[]
+  invoice        Invoice?
+  user           User?           @relation(fields: [userId], references: [id])
+  items          OrderItem[]
+  paymentIntents PaymentIntent[]
+  slotLocks      SlotLock[]
+}
+
+model OrderItem {
+  id        String   @id @default(cuid())
+  orderId   String
+  type      String
+  refId     String?
+  title     String
+  meta      String?
+  qty       Int      @default(1)
+  price     Int
+  vat       Int      @default(0)
+  total     Int
+  payload   Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  order     Order    @relation(fields: [orderId], references: [id])
+
+  @@index([orderId])
+  @@index([type])
+}
+
+model OtpRequest {
+  id         String    @id @default(cuid())
+  phone      String
+  code       String
+  expiresAt  DateTime  @map("expires_at")
+  consumedAt DateTime? @map("consumed_at")
+  createdAt  DateTime  @default(now())
+
+  @@index([phone])
+  @@index([code])
+}
+
+model PaymentIntent {
+  id               String    @id @default(cuid())
+  orderId          String
+  type             String
+  status           String    @default("created")
+  amountExpected   Int       @map("amount_expected")
+  amountReceived   Int?      @map("amount_received")
+  bankRef          String?   @map("bank_ref")
+  proofUrl         String?   @map("proof_url")
+  proofSubmittedAt DateTime? @map("proof_submitted_at")
+  proofMeta        Json?     @map("proof_meta")
+  payerName        String?   @map("payer_name")
+  payerBank        String?   @map("payer_bank")
+  transferDatetime DateTime? @map("transfer_datetime")
+  notes            String?
+  reviewedBy       String?   @map("reviewed_by")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+  order            Order     @relation(fields: [orderId], references: [id])
+
+  @@index([orderId])
+  @@index([status])
+}
+
+model Invoice {
+  id         String    @id @default(cuid())
+  orderId    String    @unique
+  invoiceNo  String    @unique @map("invoice_no")
+  totalsJson Json?     @map("totals_json")
+  vatLines   Json?     @map("vat_lines")
+  status     String    @default("draft")
+  pdfUrl     String?   @map("pdf_url")
+  createdAt  DateTime  @default(now())
+  issuedAt   DateTime? @map("issued_at")
+  order      Order     @relation(fields: [orderId], references: [id])
+
+  @@index([invoiceNo])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String?  @map("actor_id")
+  actorRole String?  @map("actor_role")
+  action    String
+  entity    String
+  entityId  String   @map("entity_id")
+  meta      Json?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([entity, entityId])
+  @@index([actorId])
+}
+
+// Sequential counters for order_ref, invoice_no etc.
+model Counter {
+  key       String   @id
+  value     Int      @default(0)
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+}
+
+// SlotLock ensures only one active lock/reservation per hall slot at a time (SQLite replacement for partial unique index on status)
+model SlotLock {
+  slotId   String   @id
+  orderId  String
+  lockedAt DateTime @default(now()) @map("locked_at")
+  expiresAt DateTime? @map("expires_at")
+  slot     HallSlot  @relation(fields: [slotId], references: [id])
+  order    Order     @relation(fields: [orderId], references: [id])
+
+  @@index([orderId])
+}
+
+enum HallSlotStatus {
+  open
+  closed
+  final
+}
+
+enum HallBookingStatus {
+  pending
+  confirmed
+  cancelled
+}
+
+enum BookingAddonType {
+  dhabaeh
+}
+
+enum DeliveryTarget {
+  HOME
+  HALL
+}
+
+// Phase 10.C Pricing models & enums
+model BasePriceMatrix {
+  id             String     @id @default(cuid())
+  animalId       String     @map("animal_id")
+  breedId        String?    @map("breed_id")
+  ageId          String     @map("age_id")
+  sizeBandId     String?    @map("size_band_id")
+  priceMode      PriceMode  @map("price_mode")
+  unitPriceMinor Int        @map("unit_price_minor")
+  isActive       Boolean    @default(true) @map("is_active")
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  @@unique([animalId, breedId, ageId, sizeBandId, priceMode])
+  @@index([animalId, ageId])
+}
+
+model ModifierPrice {
+  id          String           @id @default(cuid())
+  kind        ModifierKind     @map("kind")
+  refId       String           @map("ref_id")
+  calcType    ModifierCalcType @map("calc_type")
+  amountMinor Int?             @map("amount_minor")
+  pctBps      Int?             @map("pct_bps")
+  isActive    Boolean          @default(true) @map("is_active")
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([kind, refId])
+}
+
+model PricingDeliveryFee {
+  id             String         @id @default(cuid())
+  cityId         String         @map("city_id")
+  deliveryMethod DeliveryMethod @map("delivery_method")
+  baseFeeMinor   Int            @map("base_fee_minor")
+  minOrderMinor  Int            @default(0) @map("min_order_minor")
+  isActive       Boolean        @default(true) @map("is_active")
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  @@unique([cityId, deliveryMethod])
+}
+
+model TaxSetting {
+  id         String   @id @default(cuid())
+  vatPercent Int      @map("vat_percent")
+  isActive   Boolean  @default(true) @map("is_active")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model DiscountRule {
+  id        String        @id @default(cuid())
+  name      String
+  active    Boolean       @default(true)
+  scope     DiscountScope
+  condition Json          @map("condition_json")
+  action    Json          @map("action_json")
+  priority  Int           @default(100)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@index([active, priority])
+}
+
+enum PriceMode {
+  per_kg
+  per_unit
+}
+
+enum ModifierKind {
+  cut
+  packaging
+  cooking
+  side
+}
+
+enum ModifierCalcType {
+  flat_per_order
+  per_kg
+  per_unit
+  pct_of_base
+}
+
+enum DeliveryMethod {
+  home
+  hall
+}
+
+enum DiscountScope {
+  global
+  dhabaeh_only
+  hall_addon_only
 }
