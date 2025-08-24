@@ -23,12 +23,20 @@ import { ScrollReveal } from "@/components/ScrollReveal";
 
 export default async function Home() {
   const prismaAny = prisma as any;
-  const [flags, content, cities, featuredHalls] = await Promise.all([
-    loadFeatureFlags(),
-    loadHomeContent(),
-    prismaAny.city.findMany({ where:{ active:true }, select:{ id:true, code:true, nameAr:true, nameEn:true } }),
-    prismaAny.hall.findMany({ where:{ isActive:true, isVerified:true }, orderBy:{ createdAt:'desc' }, take:6, select:{ slug:true, name:true, nameAr:true, city:true, basePrice:true, images:true } })
-  ]);
+  let flags: any = { services: { halls: { enabled: true }, dhabaeh: { enabled: true } } };
+  let content: any = {};
+  let cities: any[] = [];
+  let featuredHalls: any[] = [];
+  try {
+    [flags, content, cities, featuredHalls] = await Promise.all([
+      loadFeatureFlags(),
+      loadHomeContent(),
+      prismaAny.city.findMany({ where:{ active:true }, select:{ id:true, code:true, nameAr:true, nameEn:true } }),
+      prismaAny.hall.findMany({ where:{ isActive:true, isVerified:true }, orderBy:{ createdAt:'desc' }, take:6, select:{ slug:true, name:true, nameAr:true, city:true, basePrice:true, images:true } })
+    ]);
+  } catch (e) {
+    console.error('HOME_DATA_LOAD_FAILED', e);
+  }
   const hallsEnabled = flags.services.halls.enabled;
   const dhabaehEnabled = flags.services.dhabaeh.enabled;
   const hero = content.hero || {};
