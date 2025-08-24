@@ -1,5 +1,9 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+export const runtime = 'nodejs';
 import { ensureAdminApi } from '@/lib/api-admin';
 
 // Worker/cron endpoint (protect via secret header) Cancels expired pending_payment orders

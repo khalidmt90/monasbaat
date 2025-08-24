@@ -2,6 +2,10 @@ import { NextResponse } from 'next/server';
 import path from 'path';
 import { promises as fs } from 'fs';
 import { prisma } from '@/lib/prisma';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+export const runtime = 'nodejs';
 import { getSessionUser } from '@/lib/api-user';
 
 // GET /api/uploads/proof/:id - protected download

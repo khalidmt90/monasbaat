@@ -1,5 +1,9 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+export const runtime = 'nodejs';
 import { ensureSuperAdmin } from '@/lib/api-super-admin';
 
 function validate(cityId?:string, nameAr?:string){ if(!cityId||!nameAr) return false; if(!nameAr.trim()) return false; return true; }

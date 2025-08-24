@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+export const runtime = 'nodejs';
+
 interface QuoteRequest {
   lineItems: Array<{ kind:'dhabaeh'; animalId:string; breedId?:string; ageId:string; cuts?:string[]; packaging?:string[]; cooking?:string[]; sides?:string[] }>;
   context: { mode:'standalone'|'hall-addon'; cityId:string; deliveryMethod:'home'|'hall' };

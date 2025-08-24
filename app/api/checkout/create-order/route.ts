@@ -1,5 +1,9 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+export const runtime = 'nodejs';
 import { getSessionUser } from '@/lib/api-user';
 import type { Prisma } from '@prisma/client';
 import { loadCatalog } from '@/lib/catalog';

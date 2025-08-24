@@ -1,5 +1,9 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+export const runtime = 'nodejs';
 import { ensureSuperAdmin } from '@/lib/api-super-admin';
 
 function validate(code?:string, nameAr?:string){
