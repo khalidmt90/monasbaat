@@ -5,7 +5,9 @@ import * as createOrderRoute from '@/app/api/checkout/create-order/route';
 
 async function createSlot(){
   const hall = await prisma.hall.findFirst();
-  return prisma.hallSlot.create({ data:{ hallId: hall!.id, date:new Date(Date.now()+86400000*4), startTime:'20:00', endTime:'22:00', status:'open' } });
+  const base = Date.now() + 86400000*4;
+  const uniqueDate = new Date(base + (Math.floor(Math.random()*10000)));
+  return prisma.hallSlot.create({ data:{ hallId: hall!.id, date: uniqueDate, startTime:'20:00', endTime:'22:00', status:'open' } });
 }
 
 test('resume fetch returns same totals and masked payment intent', async () => {
