@@ -5,6 +5,7 @@ import { loadFeatureFlags } from "@/lib/featureFlags";
 import { loadHomeContent, t, HomeContent } from "@/lib/content";
 import { prisma } from "@/lib/prisma";
 import FallbackImage from "@/components/FallbackImage";
+import Section from "@/components/Section";
 import { AutoStagger } from "@/components/AutoStagger";
 import { HoverLift, Item } from "@/components/Animated";
 import { ScrollReveal } from "@/components/ScrollReveal";
@@ -39,7 +40,7 @@ export default async function Home() {
       <section className="section pt-8">
         <div className="container">
           <div className="grid md:grid-cols-2 gap-6">
-            {hallsEnabled && (
+              {hallsEnabled && ( 
               <Link href="/halls" className="group relative rounded-2xl overflow-hidden shadow-lg aspect-[4/3] md:aspect-[5/4] flex">
                 <Image fill priority src={hero.halls?.image || 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=1600&auto=format&fit=crop'} alt={t(hero.halls?.headline,lang)} className="object-cover transition-transform duration-500 group-hover:scale-105" />
                 <div className="absolute inset-0 bg-black/50 p-6 flex flex-col justify-end text-white">
@@ -57,9 +58,35 @@ export default async function Home() {
                 </div>
               </Link>
             )}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+
+        <Section className="py-12">
+          <div className="container mx-auto px-6">
+            <h2 className="text-2xl font-semibold mb-6">What we offer</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+              <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="bg-white/95 rounded-xl p-6 shadow-card-md"> 
+                  <h3 className="font-semibold text-lg">Event Catering</h3>
+                  <p className="mt-2 text-sm text-gray-700">Custom menus, full setup and on-site service for weddings, corporate, and private events.</p>
+                </div>
+                <div className="bg-white/95 rounded-xl p-6 shadow-card-md translate-y-6"> 
+                  <h3 className="font-semibold text-lg">Dhabaeh Collections</h3>
+                  <p className="mt-2 text-sm text-gray-700">Curated regional flavors, available for pickup or delivery.</p>
+                </div>
+              </div>
+
+              <div className="bg-brand-berkeley-500 text-white rounded-xl p-8 shadow-card-lg">
+                <h3 className="font-bold text-xl">Book a Hall</h3>
+                <p className="mt-3 text-sm">Spacious halls with modern AV, flexible layouts and dedicated staff.</p>
+                <div className="mt-6">
+                  <Link href="/reserve" className="btn btn-primary">Reserve Now</Link>
+                </div>
+              </div>
+            </div>
+          </div>
+  </Section>
 
       {/* === QUICK SEARCH (kept as is, wrapped with subtle fade) === */}
     <section className="section">

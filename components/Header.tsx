@@ -7,6 +7,8 @@ import { useScrollDirection } from "@/components/hooks/useScrollDirection";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import ThemeToggle from "@/components/ThemeToggle";
+import CartButton from "@/components/cart/CartButton";
+import LangSwitch from "@/components/LangSwitch";
 
 export default function Header() {
   const { direction, y } = useScrollDirection();
@@ -33,14 +35,14 @@ export default function Header() {
         </Link>
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
           <Link href="/halls" className="nav-link">القاعات</Link>
-          <Link href="/catering" className="nav-link">الضيافة</Link>
-          <Link href="/vendors" className="nav-link">مزودون</Link>
-          <Link href="/contact" className="nav-link">تواصل</Link>
+          <Link href="/dhabaeh" className="nav-link">الذبايح</Link>
         </nav>
         <div className="flex items-center gap-1 sm:gap-3">
+          <LangSwitch />
           <ThemeToggle />
+          <CartButton />
           <Link href="/auth/login" className="btn btn-ghost hidden sm:inline-flex">تسجيل دخول</Link>
-          <Link href="/auth/register" className="btn btn-primary">انضم</Link>
+          <Link href="/auth/register" className="btn btn-primary header-cta cta-pulse">انضم</Link>
           <button aria-label="القائمة" className="md:hidden btn btn-ghost !p-2" onClick={() => setOpen(o => !o)}>
             <i className="fa-solid fa-bars" />
           </button>
@@ -55,9 +57,7 @@ export default function Header() {
         <div className="flex flex-col gap-2 text-sm font-medium">
           {[
             ["/halls", "القاعات"],
-            ["/catering", "الضيافة"],
-            ["/vendors", "مزودون"],
-            ["/contact", "تواصل"],
+            ["/dhabaeh", "الذبايح"],
           ].map(([href, label]) => (
             <Link key={href} href={href} className="px-3 py-2 rounded-lg hover:bg-black/5 active:scale-[.98] transition">
               {label}

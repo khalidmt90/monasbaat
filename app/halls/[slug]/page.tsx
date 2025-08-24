@@ -1,6 +1,9 @@
 // app/halls/[slug]/page.tsx
 import Image from "next/image";
 import Link from "next/link";
+import DhabaehToggle from "@/components/hall/DhabaehToggle";
+import { HallSlotPicker } from "@/components/hall/HallSlotPicker";
+import { DhabaehMiniStep } from "@/components/dhabaeh/DhabaehMiniStep";
 import { notFound } from "next/navigation";
 import { halls } from "@/lib/data";
 import { services } from "@/lib/services";
@@ -58,7 +61,7 @@ export default function HallDetails({ params }: Props) {
             ))}
           </div>
 
-          {/* Price / Calculator (static demo) */}
+          {/* Price / Calculator with slot + dhabaeh preview */}
           <aside className="flex flex-col gap-3">
             <div className="card p-4 text-sm">
               <b>المرافق:</b> <span>{amenitiesText}</span>
@@ -66,6 +69,11 @@ export default function HallDetails({ params }: Props) {
 
             <div className="card p-4">
               <h3 className="font-bold mb-2">حاسبة التكلفة (تجريبية)</h3>
+              <div className="mb-3">
+                <div className="label mb-1">المواعيد المتاحة</div>
+                {/* Client side picker */}
+                <HallSlotPicker hallId={hall.id} value={undefined} onChange={()=>{}} />
+              </div>
 
               <div className="grid grid-cols-2 gap-2">
                 <label className="field">
@@ -124,9 +132,9 @@ export default function HallDetails({ params }: Props) {
                 </div>
               </div>
 
-              <Link href={`/book/${hall.id}`} className="btn btn-primary w-full mt-3">
-                احجز هذه القاعة
-              </Link>
+              <DhabaehToggle hallId={hall.id} />
+              {/** Embedded mini dhabaeh step (client) **/}
+              <DhabaehMiniStep active={false} onChange={()=>{}} />
             </div>
           </aside>
         </div>

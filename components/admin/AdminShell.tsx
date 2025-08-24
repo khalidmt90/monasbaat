@@ -35,6 +35,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
           <NavItem href="/dashboard/admin/banners" label="البانرات" />
           <NavItem href="/dashboard/admin/halls" label="القاعات" />
           <NavItem href="/dashboard/admin/services" label="الخدمات" />
+          <NavItem href="/dashboard/admin/settings/feature-flags" label="أعلام الميزات" />
           <div className="text-xs uppercase text-gray-400 mt-3 mb-1">العملاء</div>
           <NavItem href="/dashboard/admin/bookings" label="الحجوزات" />
           <NavItem href="/dashboard/admin/users" label="المستخدمون" />
