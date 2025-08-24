@@ -9,6 +9,7 @@ import Credentials from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import { env } from "@/lib/env";
 
 /**
  * Single source of truth for NextAuth config
@@ -21,7 +22,7 @@ export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
 
   session: { strategy: "jwt" },
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: env.NEXTAUTH_SECRET,
 
   providers: [
     Credentials({
