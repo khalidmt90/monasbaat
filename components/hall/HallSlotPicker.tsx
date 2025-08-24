@@ -3,7 +3,7 @@ import { useEffect, useState, useMemo } from "react";
 
 export type HallSlotLite = { id:string; date:string; startTime:string; endTime:string; status:string; priceOverride:number|null; capacityLimit:number|null };
 
-export function HallSlotPicker({ hallId, value, onChange }: { hallId:string; value?:string; onChange:(slotId:string)=>void }) {
+export function HallSlotPicker({ hallId, value, onChange }: { hallId:string; value?:string; onChange?: (slotId:string)=>void }) {
   const [slots,setSlots]=useState<HallSlotLite[]>([]);
   const [error,setError]=useState(false);
   const [loading,setLoading]=useState(true);
@@ -20,7 +20,7 @@ export function HallSlotPicker({ hallId, value, onChange }: { hallId:string; val
             {list.map(s=> {
               const disabled = s.status!=='open';
               const selected = value===s.id;
-              return <button key={s.id} onClick={()=>!disabled&&onChange(s.id)} disabled={disabled} className={`px-3 py-2 rounded border text-xs ${selected? 'bg-primary text-white border-primary':'bg-white hover:bg-gray-50'} ${disabled?'opacity-40 cursor-not-allowed':''}`}>{s.startTime}-{s.endTime}</button>;
+              return <button key={s.id} onClick={()=>!disabled&&onChange?.(s.id)} disabled={disabled} className={`px-3 py-2 rounded border text-xs ${selected? 'bg-primary text-white border-primary':'bg-white hover:bg-gray-50'} ${disabled?'opacity-40 cursor-not-allowed':''}`}>{s.startTime}-{s.endTime}</button>;
             })}
           </div>
         </div>

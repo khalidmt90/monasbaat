@@ -24,6 +24,9 @@ export function generateMetadata({ params }: Props) {
   };
 }
 
+// Avoid build-time prerender that requires DATABASE_URL and passing functions
+export const dynamic = "force-dynamic";
+
 export default function HallDetails({ params }: Props) {
   const hall = halls.find((h) => h.id === params.slug);
   if (!hall) return notFound();
@@ -71,8 +74,8 @@ export default function HallDetails({ params }: Props) {
               <h3 className="font-bold mb-2">حاسبة التكلفة (تجريبية)</h3>
               <div className="mb-3">
                 <div className="label mb-1">المواعيد المتاحة</div>
-                {/* Client side picker */}
-                <HallSlotPicker hallId={hall.id} value={undefined} onChange={()=>{}} />
+                {/* Client side picker - don't pass functions from server components */}
+                <HallSlotPicker hallId={hall.id} />
               </div>
 
               <div className="grid grid-cols-2 gap-2">
@@ -133,8 +136,8 @@ export default function HallDetails({ params }: Props) {
               </div>
 
               <DhabaehToggle hallId={hall.id} />
-              {/** Embedded mini dhabaeh step (client) **/}
-              <DhabaehMiniStep active={false} onChange={()=>{}} />
+              {/** Embedded mini dhabaeh step (client) - handlers stay inside client component **/}
+              <DhabaehMiniStep active={false} />
             </div>
           </aside>
         </div>

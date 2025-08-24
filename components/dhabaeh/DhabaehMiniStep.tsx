@@ -3,12 +3,12 @@ import { useEffect, useMemo, useState } from "react";
 import type { CatalogData } from "@/lib/catalog";
 import { priceDhabaeh, type DhabaehSelection } from "@/lib/pricing";
 
-export function DhabaehMiniStep({ active, onChange, initial }: { active:boolean; onChange:(payload:{ selection:DhabaehSelection; pricing:any })=>void; initial?:DhabaehSelection }) {
+export function DhabaehMiniStep({ active, onChange, initial }: { active:boolean; onChange?: (payload:{ selection:DhabaehSelection; pricing:any })=>void; initial?:DhabaehSelection }) {
   const [catalog,setCatalog]=useState<CatalogData|null>(null); const [err,setErr]=useState(false);
   const [sel,setSel]=useState<DhabaehSelection>(initial||{});
   useEffect(()=>{ if(!active||catalog) return; (async()=>{ try{ const r= await fetch('/api/catalog'); if(!r.ok) throw 0; setCatalog(await r.json()); }catch{ setErr(true);} })(); },[active,catalog]);
   const pricing = useMemo(()=> catalog? priceDhabaeh(sel,catalog): null,[sel,catalog]);
-  useEffect(()=>{ if(pricing) onChange({ selection: sel, pricing }); },[pricing,sel,onChange]);
+  useEffect(()=>{ if(pricing) onChange?.({ selection: sel, pricing }); },[pricing,sel,onChange]);
   function update<K extends keyof DhabaehSelection>(k:K,v:DhabaehSelection[K]){ setSel(s=>({...s,[k]:v})); }
   if(!active) return null;
   const animals = catalog?.animals||[]; const ages = catalog? catalog.ages.filter(a=> a.animalId===sel.animalId):[];
