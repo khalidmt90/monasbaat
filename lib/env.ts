@@ -14,6 +14,15 @@ export const env = schema.parse({
 });
 
 // Base URL fallback so previews work without setting NEXTAUTH_URL there
-export const baseUrl =
-  env.NEXTAUTH_URL ??
-  (env.VERCEL_URL ? `https://${env.VERCEL_URL}` : "http://localhost:3000");
+// Order of resolution:
+// 1. Explicit NEXTAUTH_URL (full URL with protocol)
+// 2. NEXT_PUBLIC_SITE_URL (if you decide to expose a canonical base to the client)
+// 3. VERCEL_URL (provided automatically for previews, no protocol)
+// 4. Localhost fallback (dev only)
+export const baseUrl = (() => {
+  if (env.NEXTAUTH_URL) return env.NEXTAUTH_URL;
+  const site = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "");
+  if (site) return site;
+  if (env.VERCEL_URL) return `https://${env.VERCEL_URL}`;
+  return "http://localhost:3000";
+})();
