@@ -1,6 +1,8 @@
 // app/dashboard/admin/bookings/page.tsx
-import { prisma } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 export const revalidate = 0;
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export default async function BookingsList() {
   const bookings = await prisma.booking.findMany({
@@ -24,7 +26,7 @@ export default async function BookingsList() {
             </tr>
           </thead>
           <tbody>
-            {bookings.map(b=>(
+            {bookings.map((b: { id:string; date: Date; days:number; status:string; createdAt: Date; user?: { email?: string | null } | null; hall?: { name?: string | null } | null }) => (
               <tr key={b.id} className="border-t">
                 <td className="p-3">{b.user?.email ?? "—"}</td>
                 <td className="p-3">{b.hall?.name ?? "—"}</td>
