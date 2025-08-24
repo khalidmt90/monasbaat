@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { ensureSuperAdmin } from '@/lib/api-super-admin';
+// phase13: catalog commit
 
 function validate(code?:string, nameAr?:string, nameEn?:string){
   if(!code||!nameAr||!nameEn) return false;

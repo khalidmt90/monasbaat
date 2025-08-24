@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { ensureSuperAdmin } from '@/lib/api-super-admin';
+// phase13: catalog commit
 
 // POST { rows:[{ id?, animalId?, animalType, ageId, sizeBandId, estimatedWeightKg, basePriceModifier }] action:'upsert'|'delete'
 export async function POST(req:Request){
@@ -8,12 +9,12 @@ export async function POST(req:Request){
   try {
     const body = await req.json();
     const { action } = body;
-  if(action==='upsert'){
+    if(action==='upsert'){
       const rows = Array.isArray(body.rows)? body.rows:[];
       const results:any[]=[];
       for(const r of rows){
-    if(!r.ageId || (!r.animalType && !r.animalId)) continue;
-    if(typeof r.estimatedWeightKg !== 'number' || r.estimatedWeightKg<=0) continue;
+        if(!r.ageId || (!r.animalType && !r.animalId)) continue;
+        if(typeof r.estimatedWeightKg !== 'number' || r.estimatedWeightKg<=0) continue;
         const data:any = { animalType: r.animalType, animalId: r.animalId, ageId: r.ageId, sizeBandId: r.sizeBandId, estimatedWeightKg: r.estimatedWeightKg, basePriceModifier: r.basePriceModifier ?? 0 };
         let saved;
         if(r.id){

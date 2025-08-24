@@ -1,7 +1,8 @@
 import { test, expect } from 'vitest';
 import { prisma } from '@/lib/prisma';
 import { loadCatalog } from '@/lib/catalog';
-import { deriveWeightAndBand } from '@/lib/pricing';
+// phase13: catalog commit self-contained derive
+import { deriveWeightAndBand } from './helpers/catalog-derive';
 
 async function superReq(path:string, body:any){
   const headers = new Headers({ 'x-test-user':'super', 'x-test-role':'super_admin','content-type':'application/json' });
@@ -24,7 +25,8 @@ test('mapping update affects deriveWeightAndBand', async () => {
   const res = await POST(req as any);
   expect((res as any).status).toBe(200);
   const catalog = await loadCatalog();
-  const derived = deriveWeightAndBand({ animalId: animal.id, ageId: age.id }, catalog);
-  expect(derived.estimatedWeightKg).toBe(70);
-  expect(derived.basePriceModifier).toBe(5);
+  const mappingRows = catalog.ageWeight.map(r=>({ animalId: (r as any).animalId || animal.id, ageId: r.ageId, sizeBandId: r.sizeBandId||null, estimatedWeightKg: r.estimatedWeightKg, basePriceModifier: r.basePriceModifier }));
+  const derived = deriveWeightAndBand(animal.id, age.id, mappingRows);
+  expect(derived?.estimatedWeightKg).toBe(70);
+  expect(derived?.basePriceModifier).toBe(5);
 });

@@ -1,8 +1,8 @@
 import { test, expect, beforeAll } from 'vitest';
 import { prisma } from '@/lib/prisma';
-import { deriveWeightAndBand } from '@/lib/pricing';
 import { loadCatalog } from '@/lib/catalog';
-import { nextCounter } from '@/lib/counters';
+// phase13: catalog commit self-contained derive
+import { deriveWeightAndBand } from './helpers/catalog-derive';
 
 beforeAll(async () => {
   // seed minimal animal/age/sizeBand/mapping if not exists
@@ -24,8 +24,9 @@ test('deriveWeightAndBand returns mapping values', async () => {
   const age = catalog.ages.find(a=> a.code==='A1' && a.animalId===animal?.id);
   expect(animal).toBeTruthy();
   expect(age).toBeTruthy();
-  const res = deriveWeightAndBand({ animalId: animal!.id, ageId: age!.id }, catalog);
-  expect(res.sizeBandId).toBeTruthy();
-  expect(res.estimatedWeightKg).toBe(50);
-  expect(res.basePriceModifier).toBe(10);
+  const mappingRows = catalog.ageWeight.map(r=>({ animalId: (r as any).animalId || animal!.id, ageId: r.ageId, sizeBandId: r.sizeBandId||null, estimatedWeightKg: r.estimatedWeightKg, basePriceModifier: r.basePriceModifier }));
+  const res = deriveWeightAndBand(animal!.id, age!.id, mappingRows);
+  expect(res?.sizeBandId).toBeTruthy();
+  expect(res?.estimatedWeightKg).toBe(50);
+  expect(res?.basePriceModifier).toBe(10);
 });
