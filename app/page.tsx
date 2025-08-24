@@ -232,3 +232,6 @@ export default async function Home() {
     </>
   );
 }
+
+// Home page loads DB-driven content; avoid prerendering at build time
+export const dynamic = 'force-dynamic';

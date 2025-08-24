@@ -1,6 +1,9 @@
 // Animals admin list (read-only scaffold)
 import { prisma } from '@/lib/prisma';
 
+// Avoid prerendering on build — this page queries the DB at runtime
+export const dynamic = 'force-dynamic';
+
 export default async function AnimalsAdmin(){
   const animals = await prisma.animal.findMany({ orderBy:{ code:'asc' } });
   return <div className="p-6 space-y-4">

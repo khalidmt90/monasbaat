@@ -2,6 +2,9 @@
 import { prisma } from '@/lib/prisma';
 import { ensureSuperAdmin } from '@/lib/api-super-admin';
 
+// Avoid prerendering on build — this page queries the DB at runtime
+export const dynamic = 'force-dynamic';
+
 async function load(){
   const [animals, ages, bands, mappings] = await Promise.all([
     prisma.animal.findMany({ where:{ active:true }, orderBy:{ code:'asc' } }),
