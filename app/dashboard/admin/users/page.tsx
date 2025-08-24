@@ -1,6 +1,16 @@
 // app/dashboard/admin/users/page.tsx
-import { prisma } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 export const revalidate = 0;
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
+type AdminUserListItem = {
+  id: string;
+  email: string;
+  name: string | null;
+  role: string;
+  createdAt: string | Date;
+};
 
 export default async function UsersList() {
   const users = await prisma.user.findMany({ orderBy: { createdAt: "desc" } });
@@ -13,7 +23,7 @@ export default async function UsersList() {
             <tr><th className="p-3 text-right">البريد</th><th className="p-3 text-right">الاسم</th><th className="p-3">الدور</th><th className="p-3">تاريخ الإنشاء</th></tr>
           </thead>
           <tbody>
-            {users.map(u=>(
+            {users.map((u: AdminUserListItem)=>(
               <tr key={u.id} className="border-t">
                 <td className="p-3">{u.email}</td>
                 <td className="p-3">{u.name ?? "—"}</td>
