@@ -1,8 +1,10 @@
 // app/dashboard/admin/banners/page.tsx
 import Link from "next/link";
-import { prisma } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 
 export const revalidate = 0;
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export default async function BannersList() {
   const banners = await prisma.banner.findMany({ orderBy: [{ sort: "asc" }, { createdAt: "desc" }] });
@@ -15,7 +17,7 @@ export default async function BannersList() {
       </div>
 
       <div className="grid gap-3">
-        {banners.map(b => (
+  {banners.map((b: { id:string; imageUrl:string; title:string; section:string; active:boolean }) => (
           <div key={b.id} className="card p-4 flex items-center gap-4">
             <div className="w-24 h-16 rounded bg-cover bg-center" style={{ backgroundImage: `url(${b.imageUrl})` }} />
             <div className="min-w-0 flex-1">
