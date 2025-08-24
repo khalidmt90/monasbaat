@@ -1,8 +1,10 @@
 // app/dashboard/admin/halls/page.tsx
 import Link from "next/link";
-import { prisma } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 
 export const revalidate = 0;
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export default async function HallsList() {
   const halls = await prisma.hall.findMany({ orderBy: { createdAt: "desc" } });
@@ -13,7 +15,7 @@ export default async function HallsList() {
         <Link className="btn btn-primary" href="/dashboard/admin/halls/new">قاعة جديدة</Link>
       </div>
       <div className="grid gap-3">
-        {halls.map(h => (
+  {halls.map((h: { id:string; name:string; city:string; area:string|null; menCapacity:number; womenCapacity:number; images:any }) => (
           <div key={h.id} className="card p-4 flex items-center gap-4">
             <div className="w-24 h-16 rounded bg-cover bg-center" style={{ backgroundImage: `url(${(h.images as string[] | null)?.[0] ?? ""})` }} />
             <div className="min-w-0 flex-1">
