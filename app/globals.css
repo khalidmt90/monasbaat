@@ -3,23 +3,39 @@
 @tailwind utilities;
 
 html, body { margin: 0; padding: 0; }
-body { @apply bg-white text-gray-900 antialiased; }
+/* Fast dark UI baseline */
+body { @apply bg-slate-950 text-slate-100 antialiased; }
 /* light theme subtle surfaces */
 .surface-alt{background:#f8fafc;}
-.card{background:#ffffff;}
-@media (min-width:768px){.card{background:linear-gradient(180deg,#ffffff,#f9fafb);} }
+.card{background:#0f172a;}
+@media (min-width:768px){.card{background:linear-gradient(180deg,#0f172a,#0b1324);} }
 .section { @apply py-10; }
 .container { @apply mx-auto px-4; }
-.card { @apply rounded-2xl shadow p-6 bg-white; }
+.card { @apply rounded-2xl shadow p-6 border border-slate-700/60 bg-slate-900/60 backdrop-blur; }
 .btn { @apply inline-flex items-center justify-center rounded-xl px-4 py-2 font-medium relative overflow-hidden transition; }
-.btn-primary { @apply text-white; }
+.btn-primary { @apply text-white bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500; }
 .btn-primary:hover{filter:brightness(1.06);} 
 .btn-primary:active{filter:brightness(.92);} 
-.btn-ghost { @apply bg-transparent text-gray-800 hover:bg-gray-100; }
+.btn-ghost { @apply bg-transparent text-slate-300 hover:bg-slate-800/40; }
 .btn-gold { @apply bg-amber-500 text-white hover:bg-amber-600; }
-.input { @apply w-full rounded-xl border border-gray-300 px-3 py-2; }
-.label { @apply block mb-1 text-sm text-gray-700; }
+.input { @apply w-full rounded-xl border border-slate-700 bg-slate-900/70 px-3 py-2 placeholder-slate-500 text-slate-100; }
+.label { @apply block mb-1 text-sm text-slate-300; }
 .field { @apply grid gap-1; }
+
+/* Heading & text rhythm */
+h1,h2,h3{ @apply font-semibold tracking-tight text-slate-100; }
+h1{ @apply text-3xl md:text-4xl leading-tight; }
+h2{ @apply text-2xl md:text-3xl leading-snug; }
+h3{ @apply text-xl md:text-2xl leading-snug; }
+p{ @apply leading-relaxed text-slate-300; }
+
+/* Elevated image card helper */
+.image-card{ @apply rounded-2xl overflow-hidden border border-slate-700/60 bg-slate-900/50 shadow-md backdrop-blur transition; }
+.image-card:hover{ @apply shadow-xl -translate-y-1; }
+
+/* RTL polish */
+[dir=rtl] .btn{ @apply font-medium; }
+[dir=rtl] .card{ direction:rtl; }
 
 /* subtle interactive states */
 .btn { transition: background-color .3s var(--easing-standard), color .3s var(--easing-standard), transform .4s var(--easing-standard), box-shadow .4s var(--easing-standard); }
