@@ -13,6 +13,7 @@
     "pretest": "pnpm test:reset && node -e 'console.log(\"test db reset\")'",
     "test": "TEST_MODE=true DATABASE_URL=file:./prisma/test.db vitest run"
   },
+  "typecheck": "tsc -p tsconfig.build.json --noEmit",
   "_settingsCommitAnchor": true,
   "dependencies": {
     "@next-auth/prisma-adapter": "^1.0.7",

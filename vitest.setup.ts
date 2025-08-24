@@ -3,6 +3,7 @@ process.env.TEST_MODE = 'true'; // settings-commit-anchor: test db bootstrap & G
 process.env.DATABASE_URL = 'file:./prisma/test.db';
 
 import { prisma } from '@/lib/prisma';
+import type { Prisma } from '@prisma/client';
 
 async function applyPragmas(){
 	try { await prisma.$executeRawUnsafe('PRAGMA journal_mode=WAL;'); } catch{}
@@ -31,7 +32,7 @@ async function seedOnce(){
 		return; // give up but avoid crashing
 	}
 
-	await prisma.$transaction(async (tx:any)=>{
+	await prisma.$transaction(async (tx: Prisma.TransactionClient)=>{
 		const userA = await tx.user.upsert({ where:{ email:'userA@test.local' }, update:{}, create:{ email:'userA@test.local', password:'x', role:'USER' } });
 		const userB = await tx.user.upsert({ where:{ email:'userB@test.local' }, update:{}, create:{ email:'userB@test.local', password:'x', role:'USER' } });
 		const superAdmin = await tx.user.upsert({ where:{ email:'super@test.local' }, update:{}, create:{ email:'super@test.local', password:'x', role:'SUPER_ADMIN' } });

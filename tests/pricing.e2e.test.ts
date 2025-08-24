@@ -1,5 +1,6 @@
 import { test, expect } from 'vitest';
 import { prisma } from '@/lib/prisma';
+import type { Prisma } from '@prisma/client';
 import { makeReq } from './helpers/api';
 
 // Helper to call admin POST endpoints with super admin context
@@ -18,7 +19,7 @@ async function quote(body:any){
 
 // Deterministic pricing base test: controls its own fixtures with TEST_* codes
 test('pricing base matrix deterministic base update', async () => {
-  const setup = await prisma.$transaction(async (tx: any) => {
+  const setup = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
     // Ensure animal
     const animal = await tx.animal.upsert({ where:{ code:'TEST_ANIMAL' }, update:{ active:true }, create:{ code:'TEST_ANIMAL', nameAr:'TEST_ANIMAL', active:true } });
     // Ensure age
