@@ -1,5 +1,4 @@
 "use client";
-export const metadata = { title: "ذبايح" };
 import { useEffect, useState, useMemo } from "react";
 import { priceDhabaeh, type DhabaehSelection } from "@/lib/pricing";
 import type { CatalogData } from "@/lib/catalog";
