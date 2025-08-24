@@ -14,5 +14,8 @@ export const prisma: PrismaClient =
 
 if (process.env.NODE_ENV !== "production") globalThis.__prisma__ = prisma;
 
-// Fire and forget admin bootstrap (idempotent)
-bootstrapAdmin();
+// Fire and forget admin bootstrap (idempotent) only in runtime, not during build
+if (typeof process !== 'undefined' && !process.env.VERCEL_BUILD) {
+  // Vercel sets VERCEL_BUILD=1 during build phase; skip DB access then.
+  bootstrapAdmin();
+}
